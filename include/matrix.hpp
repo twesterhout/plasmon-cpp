@@ -8,52 +8,29 @@
 #include <type_traits>
 #include <algorithm>
 
-
-
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/complex.hpp>
-#include <boost/serialization/split_member.hpp>
-
-
 #include <iterator.hpp>
-
-
-#ifdef DEBUG
-#	define ADD_DEBUG_OUTPUT() \
-		std::cerr << "[*] " << __PRETTY_FUNCTION__ \
-		          << " ..." << std::endl
-#else
-#	define ADD_DEBUG_OUTPUT() \
-                do {} while(false)
-#endif
-
-
-
-#ifdef DEBUG
-#	define TEST_NOT_NAN(x) \
-		assert(not contains_nan(x))
-#else
-#	define TEST_NOT_NAN(x) \
-		do {} while(false)
-#endif
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \file matrix.hpp
-/// \brief This file implements a Matrix class.
-
-/// Matrix class is a thin wrapper around a std::unique_ptr<T[]> which behaves
-/// more like a two dimensional array. Data is stored in the column-major
-/// order to ease the use of LAPACK routines.
+/// \brief This file implements a Matrix class and some operations associated
+///        with it.
 ///////////////////////////////////////////////////////////////////////////////
 
 
 namespace tcm {
 
 
+namespace {
+///////////////////////////////////////////////////////////////////////////////
+/// \brief Contiguous chunk of memory. 
 
+/// This class is like a %std::vector except that it allows no resizing and is
+/// thus smaller in size by `sizeof(void*)`.
+///
+/// \tparam _Tp    element type.
+/// \tparam _Alloc allocator type.
+///////////////////////////////////////////////////////////////////////////////
 template < class _Tp
          , class _Alloc
          >
@@ -61,7 +38,8 @@ struct _Storage
 	: public std::allocator_traits<_Alloc>::template rebind_alloc<_Tp> {
 
 private:
-	using _Tp_alloc_type    = typename std::allocator_traits<_Alloc>::template rebind_alloc<_Tp>;
+	using _Tp_alloc_type    = typename std::allocator_traits<_Alloc>::template 
+		rebind_alloc<_Tp>;
 	using _Alloc_traits     = std::allocator_traits<_Tp_alloc_type>;
 
 public:
@@ -78,7 +56,6 @@ private:
 	pointer _start;
 	pointer _finish;
 
-
 	auto _allocate(size_type const n) -> pointer
 	{
 		return n != 0 
@@ -86,35 +63,39 @@ private:
 			: pointer{};
 	}
 
-	auto _deallocate(pointer p, size_type const n) -> void
+	auto _deallocate(pointer const p, size_type const n) -> void
 	{
 		if (p) _Alloc_traits::deallocate(*this, p, n);
 	}
 
-	auto _create_storage(size_type const n) -> void
+	auto _create_storage(size_type const n)  -> void
 	{
 		_start  = _allocate(n);
 		_finish = _start + n;
 	}
 
-	auto _swap_data(_Storage & x) -> void
+	auto _swap_data(_Storage & x) noexcept -> void
 	{
-		std::swap(_start, x._start);
-		std::swap(_finish, x._finish);
+		using std::swap;
+		swap(_start, x._start);
+		swap(_finish, x._finish);
 	}
 
-	auto _get_Tp_allocator() -> _Tp_alloc_type &
+	auto _get_Tp_allocator() noexcept -> _Tp_alloc_type &
 	{
 		return *static_cast<_Tp_alloc_type*>(this);
 	}
 
-	auto _get_Tp_allocator() const -> _Tp_alloc_type const&
+	auto _get_Tp_allocator() const noexcept -> _Tp_alloc_type const&
 	{
-		return *static_cast<_Tp_alloc_type*>(this);
+		return *static_cast<_Tp_alloc_type const*>(this);
 	}
+
 
 public:
 	_Storage()
+		noexcept( std::is_nothrow_default_constructible<_Tp_alloc_type>::value
+		          and std::is_nothrow_constructible<pointer, nullptr_t>::value )
 		: _Tp_alloc_type{}
 		, _start{ nullptr }
 		, _finish{ nullptr }
@@ -156,7 +137,7 @@ public:
 	}
 
 	_Storage(_Storage && x)
-		: _Storage{ std::move(x.get_Tp_allocator()) }
+		: _Storage{ std::move(x._get_Tp_allocator()) }
 	{
 		_swap_data(x);
 	}
@@ -178,7 +159,7 @@ public:
 		std::swap(x._finish, y._finish);
 	}
 };
-
+} // unnamed namespace
 
 
 
@@ -188,6 +169,8 @@ public:
 ///        of matrices used in LAPACK.
 
 /// This is a _container_ class in the sense that it manages its own memory.
+/// Matrix class is meant to be used with LAPACK/BLAS and thus focuses on
+/// fundamental numeric types.
 ///////////////////////////////////////////////////////////////////////////////
 template< class _Tp
         , class _Alloc = std::allocator<_Tp>
@@ -221,6 +204,7 @@ public:
 	/// \brief Default constructor. 
 	///////////////////////////////////////////////////////////////////////////
 	Matrix()
+		noexcept(std::is_nothrow_default_constructible<_Storage_type>::value)
 	    : _storage{}
 		, _height{ 0 }
 		, _width{ 0 }
@@ -232,6 +216,7 @@ public:
 	/// \brief Move constructor.
 	///////////////////////////////////////////////////////////////////////////
 	Matrix(Matrix && x)
+		noexcept(std::is_nothrow_move_constructible<_Storage_type>::value)
 	    : _storage{ std::move(x._storage) }
 		, _height{ 0 }
 		, _width{ 0 }
@@ -246,6 +231,7 @@ public:
 	/// \brief Copy constructor.
 	///////////////////////////////////////////////////////////////////////////
 	Matrix(Matrix const& x)
+		noexcept(std::is_nothrow_copy_constructible<_Storage_type>::value)
 	    : _storage{ x._storage }
 		, _height{ x._height }
 		, _width{ x._width }
@@ -262,6 +248,8 @@ public:
 	/// \sa Matrix(size_type const, size_type const, difference_type const).
 	///////////////////////////////////////////////////////////////////////////
 	Matrix(size_type const height, size_type const width)
+		noexcept(std::is_nothrow_constructible< _Storage_type
+		                                      , size_type>::value)
 		: _storage{ height * width }
 		, _height{ height }
 		, _width{ width }
@@ -496,34 +484,6 @@ private:
 	  swap(lhs._width, rhs._width);
 	  swap(lhs._ldim, rhs._ldim);
 	}
-
-	friend boost::serialization::access;
-	template<class Archive>
-	auto save(Archive & ar, unsigned int const version) const
-	{
-		using boost::serialization::make_array;
-
-		ar << _height;
-		ar << _width;
-		ar << make_array(data(), _height * _width);
-	}
-
-	template<class Archive>
-	auto load(Archive & ar, unsigned int const version)
-	{
-		using boost::serialization::make_array;
-
-		size_type height, width;
-		ar >> height;
-		ar >> width;
-
-		Matrix<value_type> temp{height, width};
-
-		ar >> make_array(temp.data(), height * width);
-		swap(*this, temp);
-	}
-
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
 
 
@@ -590,20 +550,6 @@ auto build_matrix( std::size_t const height, std::size_t const width
 			result(i, j) = f(i, j);
 	return result;
 }
-
-
-template<class M>
-auto contains_nan(M&& A)
-{
-	ADD_DEBUG_OUTPUT();
-	for (std::size_t j = 0; j < A.width(); ++j)
-		for (std::size_t i = 0; i < A.height(); ++i)
-			if(    std::isnan(std::real( A(i, j) ))
-			    or std::isnan(std::imag( A(i, j) ))
-			  ) return true;
-	return false;
-}
-
 
 } // namespace tcm
 
