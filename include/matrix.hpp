@@ -103,7 +103,7 @@ public:
 	}
 
 	_Storage(_Storage const& x)
-		: _Storage{ x.get_Tp_allocator() }
+		: _Storage{ x._get_Tp_allocator() }
 	{
 		_create_storage(x._finish - x._start);
 		std::uninitialized_copy( x._start, x._finish
@@ -399,7 +399,7 @@ public:
 	constexpr auto cbegin_row(size_type const i) const noexcept
 		-> const_blas_iterator<value_type>
 	{ assert(i < _height);
-	  return {data(i, 0), ldim()};
+	  return const_blas_iterator<value_type>{data(i, 0), ldim()};
 	}
 	
 	
@@ -409,7 +409,7 @@ public:
 	constexpr auto begin_row(size_type const i) noexcept
 		-> blas_iterator<value_type>
 	{ assert(i < _height);
-	  return {data(i, 0), ldim()};
+	  return blas_iterator<value_type>{data(i, 0), ldim()};
 	}
 
 
@@ -419,7 +419,7 @@ public:
 	constexpr auto cend_row(size_type const i) const noexcept
 		-> const_blas_iterator<value_type>
 	{ assert(i < _height);
-	  return {data(i, width()), ldim()};
+	  return const_blas_iterator<value_type>{data(i, width()), ldim()};
 	}
 
 
@@ -429,7 +429,7 @@ public:
 	constexpr auto end_row(size_type const i) noexcept
 		-> blas_iterator<value_type>
 	{ assert(i < _height);
-	  return {data(i, width()), ldim()};
+	  return blas_iterator<value_type>{data(i, width()), ldim()};
 	}
 
 

@@ -18,17 +18,17 @@ class const_blas_iterator
 
 private:
 	using _facade_type = 
-		typename boost::iterator_facade< const_blas_iterator<_Tp>
+		         boost::iterator_facade< const_blas_iterator<_Tp>
 	                                   , _Tp const
 	                                   , boost::random_access_traversal_tag
 	                                   , _Tp
 	                                   >;
 public:
 	
-	using pointer           = typename _facade_type::pointer;
+	using value_type        = typename _facade_type::value_type;
 	using difference_type   = typename _facade_type::difference_type;
-	using size_type         = typename _facade_type::size_type;
-	using reference         = typename _facade_type::size_type;
+	using reference         = typename _facade_type::reference;
+	using size_type         = std::size_t;
 
 	constexpr
 	const_blas_iterator() noexcept
@@ -37,7 +37,7 @@ public:
 	}
 
 	constexpr
-	const_blas_iterator( pointer const data
+	const_blas_iterator( value_type const* const data
 	                   , difference_type const step = 1) noexcept
 	    : _data{ data }, _step{ step }
 	{ 
@@ -74,7 +74,7 @@ private:
 	  return _data == other._data; }
 
 private:
-	pointer           _data;
+	value_type const* _data;
 	difference_type   _step;
 };
 
@@ -97,11 +97,10 @@ private:
 	                                   >;
 public:
 
-	using value_type        = typename _facade_type::pointer;
-	using pointer           = typename _facade_type::pointer;
+	using value_type        = typename _facade_type::value_type;
 	using difference_type   = typename _facade_type::difference_type;
-	using size_type         = typename _facade_type::size_type;
-	using reference         = typename _facade_type::size_type;
+	using reference         = typename _facade_type::reference;
+	using size_type         = std::size_t;
 
 	constexpr 
 	blas_iterator() noexcept
@@ -110,7 +109,7 @@ public:
 	}
 
 	constexpr
-	blas_iterator( pointer const data
+	blas_iterator( value_type* const data
 	             , difference_type const step = 1 ) noexcept
 	    : _data{ data }, _step{ step }
 	{ 
@@ -150,7 +149,7 @@ private:
 	{ return {_data, _step}; }
 
 private:
-	pointer          _data;
+	value_type       _data;
 	difference_type  _step;
 };
 
