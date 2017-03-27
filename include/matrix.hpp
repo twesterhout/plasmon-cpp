@@ -8,6 +8,9 @@
 #include <type_traits>
 #include <algorithm>
 
+#include <boost/align/aligned_allocator_adaptor.hpp>
+
+
 #include <iterator.hpp>
 
 
@@ -21,12 +24,11 @@
 namespace tcm {
 
 
-namespace {
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Contiguous chunk of memory. 
 
 /// This class is like a %std::vector except that it allows no resizing and is
-/// thus smaller in size by `sizeof(void*)`.
+/// thus smaller in size by `sizeof(pointer)`.
 ///
 /// \tparam _Tp    element type.
 /// \tparam _Alloc allocator type.
@@ -159,7 +161,6 @@ public:
 		std::swap(x._finish, y._finish);
 	}
 };
-} // unnamed namespace
 
 
 
@@ -170,16 +171,32 @@ public:
 
 /// This is a _container_ class in the sense that it manages its own memory.
 /// Matrix class is meant to be used with LAPACK/BLAS and thus focuses on
-/// fundamental numeric types.
+/// fundamental numeric types. There are two important differences/advantages
+/// this class has over using, for example an %std::vector.
+/// 1) As we plan to use matrices with LAPACK/BLAS routines, it helps
+///    (from the performance point of view) to correctly align our matrices.
+///    From Intel MKL's manual:
+///    > To improve performance of your application that calls Intel MKL, 
+///    > align your arrays on 64-byte boundaries and ensure that the leading 
+///    > dimensions of the arrays are divisible by 64/element_size, where 
+///    > element_size is the number of bytes for the matrix elements 
+///    > (4 for single-precision real, 8 for double-precision real and 
+///    > single-precision complex, and 16 for double-precision complex). 
+/// 2) We don't initialise storage.
 ///////////////////////////////////////////////////////////////////////////////
 template< class _Tp
         , class _Alloc = std::allocator<_Tp>
+        , std::size_t _Align = 64 // std::alignment_of<_Tp>::value
         >
 class Matrix {
 
 private:
-	using _Storage_type = _Storage<_Tp, _Alloc>;
+	using _Aligned_Alloc = boost::alignment::
+		aligned_allocator_adaptor<_Alloc>;
+	using _Storage_type = _Storage<_Tp, _Aligned_Alloc>;
 
+	static_assert( _Align % std::alignment_of<_Tp>::value == 0
+	             , "Invalid alignment." );
 public:
 	using value_type        = _Tp;
 	using reference         = typename _Storage_type::reference;
@@ -191,12 +208,16 @@ public:
 	using allocator_type    = typename _Storage_type::allocator_type;
 
 private:
-	_Storage_type   _storage;
 	size_type       _height;
 	size_type       _width;
-	difference_type _ldim;
+	size_type       _ldim;
+	_Storage_type   _storage;
 
-
+	static constexpr auto round_up(size_type const n) -> size_type
+	{
+		constexpr auto multiple = _Align / std::alignment_of<_Tp>::value;
+		return ((n + multiple - 1) / multiple) * multiple;
+	}
 
 public:
 
@@ -205,10 +226,10 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	Matrix()
 		noexcept(std::is_nothrow_default_constructible<_Storage_type>::value)
-	    : _storage{}
-		, _height{ 0 }
+		: _height{ 0 }
 		, _width{ 0 }
 		, _ldim{ 0 }
+	    , _storage{}
 	{
 	}
 
@@ -217,14 +238,15 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	Matrix(Matrix && x)
 		noexcept(std::is_nothrow_move_constructible<_Storage_type>::value)
-	    : _storage{ std::move(x._storage) }
-		, _height{ 0 }
+		: _height{ 0 }
 		, _width{ 0 }
 		, _ldim{ 0 }
+	    , _storage{ std::move(x._storage) }
 	{
-		std::swap(_height, x._height);
-		std::swap(_width, x._width);
-		std::swap(_ldim, x._ldim);
+		using std::swap;
+		swap(_height, x._height);
+		swap(_width, x._width);
+		swap(_ldim, x._ldim);
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -232,10 +254,10 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	Matrix(Matrix const& x)
 		noexcept(std::is_nothrow_copy_constructible<_Storage_type>::value)
-	    : _storage{ x._storage }
-		, _height{ x._height }
+		: _height{ x._height }
 		, _width{ x._width }
 		, _ldim{ x._ldim }
+	    , _storage{ x._storage }
 	{
 	}
 
@@ -248,34 +270,11 @@ public:
 	/// \sa Matrix(size_type const, size_type const, difference_type const).
 	///////////////////////////////////////////////////////////////////////////
 	Matrix(size_type const height, size_type const width)
-		noexcept(std::is_nothrow_constructible< _Storage_type
-		                                      , size_type>::value)
-		: _storage{ height * width }
-		, _height{ height }
+		: _height{ height }
 		, _width{ width }
-		, _ldim{ static_cast<difference_type>(height) }
+		, _ldim{ round_up(height) }
+		, _storage{ _ldim * _width }
 	{
-		assert( height < static_cast<size_type>(
-			std::numeric_limits<difference_type>::max() ) );
-	}
-
-	///////////////////////////////////////////////////////////////////////////
-	/// \brief Constructs a Matrix of given dimensions.
-
-	/// \param height Height of the matrix, i.e. number of rows.
-	/// \param width  Width of the matrix, i.e. number of columns.
-	/// \param ldim   Leading dimension of the matrix. Must be non-zero.
-	///
-	/// \sa Matrix(size_type const, size_type const).
-	///////////////////////////////////////////////////////////////////////////
-	Matrix( size_type const height
-	      , size_type const width
-	      , difference_type const ldim )
-		: Matrix{ height, width }
-	{
-		if (ldim == 0) 
-			throw std::invalid_argument{"Leading dimension mustn't be zero."};
-		_ldim = ldim;
 	}
 
 	///////////////////////////////////////////////////////////////////////////

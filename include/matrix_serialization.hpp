@@ -19,28 +19,15 @@ auto save( _Archive & ar
          , tcm::Matrix<_Tp, _Alloc> const& matrix
          , unsigned int version )
 {
-	using boost::serialization::make_array;
+	auto const height = matrix.height();
+	auto const width  = matrix.width();
+	ar << height;
+	ar << width;
 
-	if (version == 0) {
-		auto const height = matrix.height();
-		auto const width  = matrix.width();
-		ar << height;
-		ar << width;
-		ar << make_array(matrix.data(), matrix.height() * matrix.width());
-	}
-	else {
-		auto const height = matrix.height();
-		auto const width  = matrix.width();
-		auto const ldim   = matrix.ldim();
-		ar << height;
-		ar << width;
-		ar << ldim;
-		
-		for (std::size_t col = 0; col < matrix.width(); ++col) {
-			for (std::size_t row = 0; row < matrix.height(); ++row) {
-				// we need a reference here
-				ar << *matrix.data(row, col);
-			}
+	for (std::size_t col = 0; col < matrix.width(); ++col) {
+		for (std::size_t row = 0; row < matrix.height(); ++row) {
+			// we need a reference here
+			ar << *matrix.data(row, col);
 		}
 	}
 }
@@ -51,33 +38,20 @@ auto load( _Archive & ar
          , tcm::Matrix<_Tp, _Alloc> & matrix
          , unsigned int version )
 {
+	using std::swap;
 	using M = tcm::Matrix<_Tp, _Alloc>;
-	using boost::serialization::make_array;
 
-	if (version == 0) {
-		typename M::size_type height, width;
+	typename M::size_type height, width;
+	ar >> height;
+	ar >> width;
 
-		ar >> height;
-		ar >> width;
-		M temp{height, width};
-		ar >> make_array(temp.data(), height * width);
-		swap(matrix, temp);
-	}
-	else {
-		typename M::size_type       height, width;
-		typename M::difference_type ldim;
-		ar >> height;
-		ar >> width;
-		ar >> ldim;
-	
-		M temp{height, width, ldim};
-		for (std::size_t col = 0; col < matrix.width(); ++col) {
-			for (std::size_t row = 0; row < matrix.height(); ++row) {
-				ar >> temp(row, col);
-			}
+	M temp{height, width};
+	for (std::size_t col = 0; col < width; ++col) {
+		for (std::size_t row = 0; row < height; ++row) {
+			ar >> temp(row, col);
 		}
-		swap(matrix, temp);
 	}
+	swap(matrix, temp);
 }
 
 

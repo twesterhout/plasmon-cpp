@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <type_traits>
+#include <memory>
 #include <utility>
 
 namespace tcm {
@@ -29,6 +30,27 @@ template<class T> struct Base_impl<std::complex<T>> { using type = T; };
 
 template<class T>
 using Base = typename Base_impl<T>::type;
+
+
+
+template <class _Alloc>
+auto allocate_workspace(_Alloc& alloc, std::size_t n) 
+{
+	assert(n != 0);
+
+	using _Alloc_traits = std::allocator_traits<_Alloc>;
+	auto deleter = [&alloc, n] (auto* const p) {
+		_Alloc_traits::deallocate(alloc, p, n);
+	};
+
+	return std::unique_ptr< typename _Alloc_traits::value_type
+	                      , decltype(deleter) >
+		( _Alloc_traits::allocate(alloc, n)
+		, deleter );
+}
+
+
+
 
 
 
