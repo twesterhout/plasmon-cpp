@@ -1,0 +1,36 @@
+<map id="include/utils.hpp" name="include/utils.hpp">
+<area shape="rect" id="node2" href="$_8math__routines_8hpp.html" title="include/.math_routines.hpp" alt="" coords="801,88,980,115"/>
+<area shape="rect" id="node3" href="$blas__wrapper_8hpp.html" title="Defines template versions of some BLAS routines. " alt="" coords="1005,88,1173,115"/>
+<area shape="rect" id="node21" href="$general_8hpp.html" title="include/general.hpp" alt="" coords="1801,245,1935,272"/>
+<area shape="rect" id="node22" href="$lapack_8hpp.html" title="include/lapack.hpp" alt="" coords="1324,328,1453,355"/>
+<area shape="rect" id="node27" href="$include_2hermitian_8hpp.html" title="include/hermitian.hpp" alt="" coords="1631,245,1776,272"/>
+<area shape="rect" id="node28" href="$lapack__wrapper__atlas_8hpp.html" title="include/lapack_wrapper\l_atlas.hpp" alt="" coords="1577,81,1735,122"/>
+<area shape="rect" id="node30" href="$include_2lapack__wrapper__mkl_8hpp.html" title="include/lapack_wrapper\l_mkl.hpp" alt="" coords="1818,81,1976,122"/>
+<area shape="rect" id="node31" href="$matrix_8hpp.html" title="This file implements a Matrix class and some operations associated with it. " alt="" coords="1196,171,1324,197"/>
+<area shape="rect" id="node4" href="$blas_8hpp.html" title="BLAS&#45;like functionality. " alt="" coords="843,245,959,272"/>
+<area shape="rect" id="node15" href="$ring__traits_8hpp.html" title="Defines the Ring interface. &#160;From mathematics, a ring is a set with binary operations + and * satisfy..." alt="" coords="479,171,627,197"/>
+<area shape="rect" id="node5" href="$dielectric__function__v2_8hpp.html" title="include/dielectric\l_function_v2.hpp" alt="" coords="863,321,984,362"/>
+<area shape="rect" id="node12" href="$dot_8cpp.html" title="tests/dot.cpp" alt="" coords="1009,328,1108,355"/>
+<area shape="rect" id="node13" href="$gemm_8cpp.html" title="tests/gemm.cpp" alt="" coords="1133,328,1248,355"/>
+<area shape="rect" id="node14" href="$gemv_8cpp.html" title="tests/gemv.cpp" alt="" coords="727,328,837,355"/>
+<area shape="rect" id="node6" href="$hello_8cpp.html" title="src/hello.cpp" alt="" coords="832,419,928,445"/>
+<area shape="rect" id="node7" href="$potential_8cpp.html" title="src/potential.cpp" alt="" coords="361,419,479,445"/>
+<area shape="rect" id="node8" href="$dielectric_8cpp.html" title="tests/dielectric.cpp" alt="" coords="1323,419,1455,445"/>
+<area shape="rect" id="node9" href="$polarizability_8cpp.html" title="tests/polarizability.cpp" alt="" coords="1147,419,1299,445"/>
+<area shape="rect" id="node10" href="$shengjun__paper_8cpp.html" title="tests/shengjun_paper.cpp" alt="" coords="952,419,1123,445"/>
+<area shape="rect" id="node11" href="$chi__function_8cpp.html" title="tests/symbolic/chi\l_function.cpp" alt="" coords="504,411,632,453"/>
+<area shape="rect" id="node16" href="$polynomial_8hpp.html" title="include/polynomial.hpp" alt="" coords="324,245,477,272"/>
+<area shape="rect" id="node20" href="$main_8cpp.html" title="main.cpp" alt="" coords="516,245,589,272"/>
+<area shape="rect" id="node17" href="$factor_8hpp.html" title="include/factor.hpp" alt="" coords="180,328,305,355"/>
+<area shape="rect" id="node18" href="$symbolic_8hpp.html" title="include/symbolic.hpp" alt="" coords="329,328,473,355"/>
+<area shape="rect" id="node19" href="$g__function_8cpp.html" title="tests/symbolic/g_function.cpp" alt="" coords="5,419,200,445"/>
+<area shape="rect" id="node23" href="$solve__system_8cpp.html" title="src/solve_system.cpp" alt="" coords="657,419,807,445"/>
+<area shape="rect" id="node24" href="$geev_8cpp.html" title="tests/geev.cpp" alt="" coords="1831,419,1939,445"/>
+<area shape="rect" id="node25" href="$tests_2heevr_8cpp.html" title="tests/heevr.cpp" alt="" coords="1480,419,1591,445"/>
+<area shape="rect" id="node26" href="$lapack__diagonalize_8cpp.html" title="tests/lapack_diagonalize.cpp" alt="" coords="1617,419,1807,445"/>
+<area shape="rect" id="node29" href="$include_2lapack__wrapper_8hpp.html" title="include/lapack_wrapper.hpp" alt="" coords="1571,171,1753,197"/>
+<area shape="rect" id="node32" href="$io_8hpp.html" title="include/io.hpp" alt="" coords="983,245,1085,272"/>
+<area shape="rect" id="node33" href="$matrix__serialization_8hpp.html" title="include/matrix_serialization.hpp" alt="" coords="498,328,701,355"/>
+<area shape="rect" id="node35" href="$test__matrix_8cpp.html" title="test_matrix.cpp" alt="" coords="1111,245,1221,272"/>
+<area shape="rect" id="node34" href="$convert_8cpp.html" title="src/convert.cpp" alt="" coords="225,419,336,445"/>
+</map>

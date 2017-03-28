@@ -14,9 +14,9 @@
 namespace boost {
 namespace serialization {
 
-template <class _Archive, class _Tp, class _Alloc>
+template <class _Archive, class _Tp, std::size_t _Align, class _Alloc>
 auto save( _Archive & ar
-         , tcm::Matrix<_Tp, _Alloc> const& matrix
+         , tcm::Matrix<_Tp, _Align, _Alloc> const& matrix
          , unsigned int version )
 {
 	auto const height = matrix.height();
@@ -33,13 +33,13 @@ auto save( _Archive & ar
 }
 
 
-template <class _Archive, class _Tp, class _Alloc>
+template <class _Archive, class _Tp, std::size_t _Align, class _Alloc>
 auto load( _Archive & ar
-         , tcm::Matrix<_Tp, _Alloc> & matrix
+         , tcm::Matrix<_Tp, _Align, _Alloc> & matrix
          , unsigned int version )
 {
 	using std::swap;
-	using M = tcm::Matrix<_Tp, _Alloc>;
+	using M = tcm::Matrix<_Tp, _Align, _Alloc>;
 
 	typename M::size_type height, width;
 	ar >> height;
@@ -55,13 +55,13 @@ auto load( _Archive & ar
 }
 
 
-template<class _Archive, class _Tp, class _Alloc>
+template<class _Archive, class _Tp, std::size_t _Align, class _Alloc>
 inline 
 auto serialize( _Archive & ar
-              , tcm::Matrix<_Tp, _Alloc> & matrix
-              , unsigned int const file_version ) -> void
+              , tcm::Matrix<_Tp, _Align, _Alloc> & matrix
+              , unsigned int const version ) -> void
 {
-	split_free(ar, matrix, file_version); 
+	split_free(ar, matrix, version); 
 }
 
 

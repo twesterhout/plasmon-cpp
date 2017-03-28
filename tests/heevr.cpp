@@ -14,9 +14,9 @@ using namespace tcm;
 template<class T>
 auto apply_heevr(std::size_t const N) -> void
 {
-	Matrix<T> A{N, N};
-	Matrix<utils::Base<T>> W{N, 1};
-	Matrix<T> Z{N, N};
+	Matrix<T, 64> A{N, N};
+	Matrix<utils::Base<T>, 64> W{N, 1};
+	Matrix<T, 64> Z{N, N};
 	
 	std::cin >> A;
 
@@ -35,6 +35,7 @@ int main(int argc, char** argv)
 	func_map["double"]         = &apply_heevr<double>;
 	func_map["complex-float"]  = &apply_heevr<std::complex<float>>;
 	func_map["complex-double"] = &apply_heevr<std::complex<double>>;
+
 
 	assert(argc == 3);
 	const auto N = static_cast<std::size_t>(std::stoi(argv[2]));

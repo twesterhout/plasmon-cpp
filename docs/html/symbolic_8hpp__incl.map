@@ -1,0 +1,10 @@
+<map id="include/symbolic.hpp" name="include/symbolic.hpp">
+<area shape="rect" id="node4" href="$matrix_8hpp.html" title="This file implements a Matrix class and some operations associated with it. " alt="" coords="900,229,981,256"/>
+<area shape="rect" id="node16" href="$polynomial_8hpp.html" title="polynomial.hpp" alt="" coords="288,80,397,107"/>
+<area shape="rect" id="node11" href="$include_2utils_8hpp.html" title="utils.hpp" alt="" coords="703,312,773,339"/>
+<area shape="rect" id="node14" href="$iterator_8hpp.html" title="iterator.hpp" alt="" coords="798,312,884,339"/>
+<area shape="rect" id="node20" href="$helper_8hpp.html" title="helper.hpp" alt="" coords="5,155,87,181"/>
+<area shape="rect" id="node22" href="$ring__traits_8hpp.html" title="Defines the Ring interface. &#160;From mathematics, a ring is a set with binary operations + and * satisfy..." alt="" coords="427,155,531,181"/>
+<area shape="rect" id="node23" href="$blas__wrapper_8hpp.html" title="Defines template versions of some BLAS routines. " alt="" coords="606,229,729,256"/>
+<area shape="rect" id="node24" href="$include_2config_8hpp.html" title="config.hpp" alt="" coords="545,312,627,339"/>
+</map>

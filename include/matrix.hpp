@@ -10,7 +10,7 @@
 
 #include <boost/align/aligned_allocator_adaptor.hpp>
 
-
+#include <utils.hpp>
 #include <iterator.hpp>
 
 
@@ -24,155 +24,18 @@
 namespace tcm {
 
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief Contiguous chunk of memory. 
-
-/// This class is like a %std::vector except that it allows no resizing and is
-/// thus smaller in size by `sizeof(pointer)`.
-///
-/// \tparam _Tp    element type.
-/// \tparam _Alloc allocator type.
-///////////////////////////////////////////////////////////////////////////////
-template < class _Tp
-         , class _Alloc
-         >
-struct _Storage 
-	: public std::allocator_traits<_Alloc>::template rebind_alloc<_Tp> {
-
-private:
-	using _Tp_alloc_type    = typename std::allocator_traits<_Alloc>::template 
-		rebind_alloc<_Tp>;
-	using _Alloc_traits     = std::allocator_traits<_Tp_alloc_type>;
-
-public:
-	using value_type        = _Tp;
-	using reference         = std::add_lvalue_reference_t<_Tp>;
-	using const_reference   = std::add_const_t<reference>;
-	using pointer           = typename _Alloc_traits::pointer;
-	using const_pointer     = typename _Alloc_traits::const_pointer;
-	using size_type         = typename _Alloc_traits::size_type;
-	using difference_type   = typename _Alloc_traits::difference_type;
-	using allocator_type    = _Alloc;
-
-private:
-	pointer _start;
-	pointer _finish;
-
-	auto _allocate(size_type const n) -> pointer
-	{
-		return n != 0 
-			? _Alloc_traits::allocate(*this, n)
-			: pointer{};
-	}
-
-	auto _deallocate(pointer const p, size_type const n) -> void
-	{
-		if (p) _Alloc_traits::deallocate(*this, p, n);
-	}
-
-	auto _create_storage(size_type const n)  -> void
-	{
-		_start  = _allocate(n);
-		_finish = _start + n;
-	}
-
-	auto _swap_data(_Storage & x) noexcept -> void
-	{
-		using std::swap;
-		swap(_start, x._start);
-		swap(_finish, x._finish);
-	}
-
-	auto _get_Tp_allocator() noexcept -> _Tp_alloc_type &
-	{
-		return *static_cast<_Tp_alloc_type*>(this);
-	}
-
-	auto _get_Tp_allocator() const noexcept -> _Tp_alloc_type const&
-	{
-		return *static_cast<_Tp_alloc_type const*>(this);
-	}
-
-
-public:
-	_Storage()
-		noexcept( std::is_nothrow_default_constructible<_Tp_alloc_type>::value
-		          and std::is_nothrow_constructible<pointer, nullptr_t>::value )
-		: _Tp_alloc_type{}
-		, _start{ nullptr }
-		, _finish{ nullptr }
-	{
-	}
-
-	_Storage(_Storage const& x)
-		: _Storage{ x._get_Tp_allocator() }
-	{
-		_create_storage(x._finish - x._start);
-		std::uninitialized_copy( x._start, x._finish
-		                       , _start );
-	}
-
-	_Storage(allocator_type const& a)
-		: _Tp_alloc_type{ a }
-		, _start{ nullptr }
-		, _finish{ nullptr }
-	{
-	}
-
-	_Storage(size_type const n)
-		: _Tp_alloc_type{}
-	{
-		_create_storage(n);
-	}
-
-	_Storage(allocator_type const& a, size_type const n)
-		: _Tp_alloc_type{ a }
-	{
-		_create_storage(n);
-	}
-
-	_Storage(_Tp_alloc_type && a)
-		: _Tp_alloc_type{ std::move(a) }
-		, _start{ nullptr }
-		, _finish{ nullptr }
-	{
-	}
-
-	_Storage(_Storage && x)
-		: _Storage{ std::move(x._get_Tp_allocator()) }
-	{
-		_swap_data(x);
-	}
-
-	~_Storage()
-	{
-		_deallocate(_start, _finish - _start);
-	}
-
-	constexpr auto size() const noexcept -> size_type
-	{ return _finish - _start; }
-
-	constexpr auto data() const noexcept -> pointer
-	{ return _start; }
-
-	friend auto swap(_Storage & x, _Storage & y)
-	{
-		std::swap(x._start, y._start);
-		std::swap(x._finish, y._finish);
-	}
-};
 
 
 
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A simple wrapper around the (data, ldim, width) representation
-///        of matrices used in LAPACK.
+///        of matrices used in LAPACK. Uses column-major ordering.
 
 /// This is a _container_ class in the sense that it manages its own memory.
 /// Matrix class is meant to be used with LAPACK/BLAS and thus focuses on
-/// fundamental numeric types. There are two important differences/advantages
-/// this class has over using, for example an %std::vector.
+/// fundamental numeric types. There are two important differences
+/// between this class and, for example, an %std::vector.
 /// 1) As we plan to use matrices with LAPACK/BLAS routines, it helps
 ///    (from the performance point of view) to correctly align our matrices.
 ///    From Intel MKL's manual:
@@ -183,20 +46,34 @@ public:
 ///    > (4 for single-precision real, 8 for double-precision real and 
 ///    > single-precision complex, and 16 for double-precision complex). 
 /// 2) We don't initialise storage.
+///
+/// \tparam _Tp Element type of the matrix.
+/// \tparam _Align Alignment. Must be a power of 2. This argument is used 
+///                for two things:
+///                1) Allocation of storage that is aligned at least to _Alloc.
+///                2) Computing the leading dimension of the matrix to ensure
+///                   that `this->data(0, 1)` is again aligned to _Alloc.
+/// 
+///                We use %boost::alignment::aligned_allocator_adaptor
+///                for this.
+///
 ///////////////////////////////////////////////////////////////////////////////
 template< class _Tp
+        , std::size_t _Align = std::alignment_of<_Tp>::value
         , class _Alloc = std::allocator<_Tp>
-        , std::size_t _Align = 64 // std::alignment_of<_Tp>::value
         >
 class Matrix {
 
 private:
 	using _Aligned_Alloc = boost::alignment::
-		aligned_allocator_adaptor<_Alloc>;
-	using _Storage_type = _Storage<_Tp, _Aligned_Alloc>;
+		aligned_allocator_adaptor<_Alloc, _Align>;
+	using _Storage_type = utils::_Storage<_Tp, _Aligned_Alloc>;
 
+	static_assert( (_Align != 0) and ((_Align & (_Align - 1)) == 0)
+	             , "_Align must be a power of 2" );
 	static_assert( _Align % std::alignment_of<_Tp>::value == 0
 	             , "Invalid alignment." );
+
 public:
 	using value_type        = _Tp;
 	using reference         = typename _Storage_type::reference;
@@ -319,7 +196,7 @@ public:
 
 	/// \sa width(), height().
 	///////////////////////////////////////////////////////////////////////////
-	constexpr auto ldim() const noexcept -> difference_type
+	constexpr auto ldim() const noexcept -> size_type
 	{ return _ldim; }
 
 
@@ -364,7 +241,7 @@ public:
 	constexpr
 	auto data( size_type const i
 	         , size_type const j ) noexcept -> pointer
-	{ return data() + (i + _height * j); }
+	{ return data() + (i + _ldim * j); }
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -377,7 +254,8 @@ public:
 	constexpr
 	auto operator() ( size_type const i
 	                , size_type const j ) const noexcept -> value_type
-	{ return *data(i, j); 
+	{ assert(i < height() and j < width() and "Index out of bounds.");
+	  return *data(i, j); 
 	}
 
 
@@ -388,7 +266,8 @@ public:
 	constexpr
 	auto operator() ( size_type const i
 	                , size_type const j ) noexcept -> reference
-	{ return *data(i, j);
+	{ assert(i < height() and j < width() and "Index out of bounds.");
+	  return *data(i, j);
 	}
 
 
@@ -397,7 +276,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto cbegin_row(size_type const i) const noexcept
 		-> const_blas_iterator<value_type>
-	{ assert(i < _height);
+	{ assert(i < height() and "Index out of bounds.");
 	  return const_blas_iterator<value_type>{data(i, 0), ldim()};
 	}
 	
@@ -407,7 +286,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto begin_row(size_type const i) noexcept
 		-> blas_iterator<value_type>
-	{ assert(i < _height);
+	{ assert(i < height() and "Index out of bounds.");
 	  return blas_iterator<value_type>{data(i, 0), ldim()};
 	}
 
@@ -417,7 +296,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto cend_row(size_type const i) const noexcept
 		-> const_blas_iterator<value_type>
-	{ assert(i < _height);
+	{ assert(i < height() and "Index out of bounds.");
 	  return const_blas_iterator<value_type>{data(i, width()), ldim()};
 	}
 
@@ -427,7 +306,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto end_row(size_type const i) noexcept
 		-> blas_iterator<value_type>
-	{ assert(i < _height);
+	{ assert(i < height() and "Index out of bounds.");
 	  return blas_iterator<value_type>{data(i, width()), ldim()};
 	}
 
@@ -438,7 +317,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto cbegin_column(size_type const j) const noexcept
 		-> const_blas_iterator<value_type>
-	{ assert(j < _width);
+	{ assert(j < width() and "Index out of bounds.");
 	  return {data(0, j), 1};
 	}
 	
@@ -449,7 +328,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto begin_column(size_type const j) noexcept
 		-> blas_iterator<value_type>
-	{ assert(j < _width);
+	{ assert(j < width() and "Index out of bounds.");
 	  return blas_iterator<value_type>{data(0, j), 1};
 	}
 
@@ -459,7 +338,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto cend_column(size_type const j) const noexcept
 		-> const_blas_iterator<value_type>
-	{ assert(j < _width);
+	{ assert(j < width() and "Index out of bounds.");
 	  return const_blas_iterator<value_type>{data(height(), j), 1};
 	}
 
@@ -469,7 +348,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	constexpr auto end_column(size_type const j) noexcept
 		-> blas_iterator<value_type>
-	{ assert(j < _width);
+	{ assert(j < width() and "Index out of bounds.");
 	  return blas_iterator<value_type>{data(height(), j), 1};
 	}
 
@@ -510,8 +389,8 @@ constexpr
 auto is_square(_M const& A) noexcept -> bool {return A.width() == A.height();}
 
 
-template <class _T, class _Alloc>
-auto operator<< (std::ostream& out, Matrix<_T, _Alloc> const& A) 
+template <class _T, std::size_t _Align, class _Alloc>
+auto operator<< (std::ostream& out, Matrix<_T, _Align, _Alloc> const& A) 
 	-> std::ostream&
 {
 	for (std::size_t i = 0; i < A.height(); ++i) {
@@ -523,8 +402,8 @@ auto operator<< (std::ostream& out, Matrix<_T, _Alloc> const& A)
 }
 
 
-template<class _T, class _Alloc>
-auto operator>> (std::istream& in, Matrix<_T, _Alloc>& A) 
+template<class _T, std::size_t _Align, class _Alloc>
+auto operator>> (std::istream& in, Matrix<_T, _Align, _Alloc>& A) 
 	-> std::istream&
 {
 	for (std::size_t i = 0; i < A.height(); ++i) {

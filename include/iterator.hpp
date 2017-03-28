@@ -149,7 +149,7 @@ private:
 	{ return {_data, _step}; }
 
 private:
-	value_type       _data;
+	value_type*      _data;
 	difference_type  _step;
 };
 
