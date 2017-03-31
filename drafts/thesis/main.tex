@@ -1,0 +1,202 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[margin=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{textcomp}
+
+\usepackage[font={small,it}]{caption}
+
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{dsfont}
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage[inline]{enumitem}
+
+\usepackage{tikz}
+
+\usepackage{cite}
+\bibliographystyle{apalike}
+
+% \title{}
+% \date{}
+% \author{}
+
+\begin{document}
+
+
+
+\section{Theory of Linear Response in a Nutshell}
+    Consider an electron system subject to small external perturbation $V_\text{ext}(\mathbf{r}, t)$. The total potential $V(\mathbf{r}, t)$ is then given by
+    \begin{equation*}
+        \begin{aligned}
+        V(\mathbf{r}, t) 
+            &= \left( \hat\varepsilon^{-1} V_\text{ext} \right)(\mathbf{r}, t) \\
+            &= \int\limits_{\text{all space}}\!\!\!\!\!\! \text{d}^3 r' \int\limits_{-\infty}^{t}\!\! \text{d} t'\, \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, t - t') V_\text{ext}(\mathbf{r'}, t')\; .
+        \end{aligned}
+    \end{equation*}
+    Linear operator $\hat\varepsilon^{-1}$ is called the \textit{inverse dielectric function}. Applying Fourier transformation to $V$ and $V_\text{ext}$, we obtain\footnote{ %
+\begin{equation*}
+\begin{aligned}
+    V(\mathbf{r}, \omega) 
+        &= \int_{-\infty}^{\infty}\!\!\!\! \text{d}t \; e^{i\omega t}\, V(\mathbf{r}, t) \\
+        &= \int\!\! \text{d}^3 r' \!\!
+           \int_{-\infty}^{\infty}\!\!\!\! \text{d}t 
+           \int_{-\infty}^{t}\!\!\!\! \text{d} t' \;
+           e^{i\omega t}\, \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, t - t') V_\text{ext}(\mathbf{r'}, t') \\
+        &= \int\!\! \text{d}^3 r' \!\!
+           \int_{-\infty}^{\infty}\! \frac{\text{d}\omega'}{2\pi} 
+           \int_{-\infty}^{\infty}\!\!\!\! \text{d}t
+           \int_{-\infty}^{t}\!\!\!\! \text{d}t' \;
+           e^{i\omega t}e^{-i\omega' t'} \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, t - t') V_\text{ext}(\mathbf{r'}, \omega') \\
+        &= \int\!\! \text{d}^3 r' \!\!
+           \int_{-\infty}^{\infty}\! \frac{\text{d}\omega'}{2\pi} V_\text{ext}(\mathbf{r'}, \omega')
+           \int_{-\infty}^{\infty}\!\!\!\! \text{d}t
+           \int_{-\infty}^{t}\!\!\!\! \text{d}t' \;
+           e^{i(\omega - \omega')t}e^{i\omega' (t - t')} \, \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, t - t')  \\
+        &= \int\!\! \text{d}^3 r' \!\!
+           \int_{-\infty}^{\infty}\! \frac{\text{d}\omega'}{2\pi} \; V_\text{ext}(\mathbf{r'}, \omega')
+           \int_{-\infty}^{\infty}\!\!\!\! \text{d}t \, e^{i(\omega - \omega')t}
+           \int_{\infty}^{0}\!\! (-\text{d}\tau) \;
+           e^{i\omega' \tau} \, \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \tau)  \\
+        &= \int\!\! \text{d}^3 r' \!\!
+           \int_{-\infty}^{\infty} \!\!\!\! \text{d}\omega' \,
+           \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \omega') V_\text{ext}(\mathbf{r'}, \omega')
+           \cdot \frac{1}{2\pi}\int_{-\infty}^{\infty}\!\! \text{d}t \; e^{i(\omega - \omega')t} \\
+        &= \int\!\! \text{d}^3 r' \;
+           \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \omega) V_\text{ext}(\mathbf{r'}, \omega)\; .
+\end{aligned}
+\end{equation*}
+}
+    \begin{equation*}
+        \begin{aligned}
+        V(\mathbf{r}, \omega) 
+            &= \left( \hat\varepsilon^{-1} V_\text{ext} \right)(\mathbf{r}, t) \\
+            &= \int\limits_{\text{all space}}\!\!\!\!\!\! \text{d}^3 r' \, \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \omega) V_\text{ext}(\mathbf{r'}, \omega)\; , \\
+        \varepsilon^{-1}(\mathbf{r},\mathbf{r'},\omega) &= \int\limits_0^\infty \! \text{d}t \; e^{i\omega t}\,\varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, t)\; .
+        \end{aligned}
+    \end{equation*}
+   
+    Now consider a system of non-interacting electrons described in a single-particle approximation by a Hamiltonian $\hat H_0$. Let $E_i$ denote single-particle energy levels with corresponding eigenstates $| i \rangle$. One-particle density matrix is then
+    \begin{equation} \label{eq:rho_0}
+        \hat\rho_0 = \sum_i n_i \, | i \rangle\! \langle i|\; , 
+    \end{equation}
+    where $n_i$ denotes the occupational number at energy $E_i$ which, in equilibrium, is given by the Fermi-Dirac distribution. Electron density operator is $\hat N(\mathbf{r}) = |\mathbf{r}\rangle \! \langle \mathbf{r}|$. Equation of motion reads
+    \begin{equation*}
+        i\hbar\frac{\text{d}\hat\rho_0}{\text{d}t} = [\hat H_0, \hat\rho_0 ] = 0\; .
+    \end{equation*}
+    
+    Within RPA (Random Phase Approximation) we are interested in the reponse of the system to the perturbation of the form $\hat V e^{-i\omega t + \eta t}$ (\textbf{TODO:} explain $\eta$). In the first order approximation, $\hat\rho = \hat\rho_0 + \hat\rho' + \mathcal{O}(\hat V^2)$, where $\hat\rho_0$ is defined by eq. \eqref{eq:rho_0} and $\hat\rho' \propto \hat V$. We thus have
+    \begin{equation} \label{eq:time_evolution_accent}
+        \left.
+        \begin{aligned}
+            i\hbar \frac{\text{d}\hat\rho}{\text{d}t} &= i\hbar \frac{\text{d}\hat\rho_0}{\text{d}t} + i\hbar\frac{\text{d}\hat\rho'}{\text{d}t} \\
+            [\hat H, \hat\rho] &= [\hat H_0, \hat \rho_0] + [\hat H_0, \hat \rho'] + [\hat V, \hat \rho_0] e^{-i\omega t + \eta t} + \mathcal{O}(\hat V^2)
+        \end{aligned} \right\} \implies
+        i\hbar \frac{\text{d}\hat\rho'}{\text{d}t} = [\hat H_0, \hat \rho'] + [\hat V, \hat \rho_0] e^{-i\omega t + \eta t}\; .
+    \end{equation}
+    Using an ansatz $\hat\rho' = \hat G \hat V e^{-i\omega t + \eta t}$, where $\hat G$ is some time-independent operator, we obtain\footnote{ %
+    Calculating matrix elements:
+    \begin{equation*}
+    \begin{gathered}
+        \langle i | i\hbar \frac{\text{d}\hat\rho'}{\text{d}t} | j \rangle = 
+            \hbar(\omega + i\eta)\langle i| \hat\rho' | j \rangle\; , \\
+        \langle i | [\hat H_0, \hat\rho'] | j \rangle = (E_i - E_j) \langle i| \hat\rho' | j \rangle\; , \\
+        \langle i | [\hat V, \hat\rho_0] | j \rangle = (n_j - n_i) \langle i| \hat V | j \rangle\; .
+    \end{gathered}
+    \end{equation*}
+    Eq. \eqref{eq:time_evolution_accent} now reads
+    \begin{equation*}
+         \langle i| \hat\rho' |j\rangle =
+            \frac{(n_i - n_j)\, e^{-i\omega t + \eta t}}{E_i - E_j - \hbar(\omega + i\eta)} \langle i| \hat V |j \rangle \; .
+    \end{equation*}
+} % end footnote
+    \begin{equation} \label{eq:g_function}
+    \begin{aligned}
+        \langle i | \hat G \hat V | j \rangle 
+            &= \frac{n_i - n_j}{E_i - E_j - \hbar(\omega + i\eta)}\langle i | \hat V | j \rangle \\
+            &\equiv G_{i,j}\, \langle i | \hat V | j \rangle\; .
+    \end{aligned}
+    \end{equation}
+    It is important not to confuse $G_{i,j}$ with matrix element $\langle i|\hat G| j\rangle$! We can now calculate the induced electron density $\delta \langle\hat N(\mathbf{r})\rangle$, also called the \textit{polarizability matrix}:
+    \begin{equation} \label{eq:def_chi_function}
+    \begin{aligned}
+        \langle \mathbf{r} | \hat\chi(t) | \mathbf{r} \rangle
+            &= \delta\langle \hat N(\mathbf{r})\rangle \\
+            &= \operatorname{Tr}(\hat N(\mathbf{r}) \hat\rho) - \operatorname{Tr}(\hat N(\mathbf{r}) \hat\rho_0) = \operatorname{Tr}(\hat N(\mathbf{r})\hat\rho') \\
+            &= \sum_{i,j} \langle j|\mathbf{r}\rangle \langle\mathbf{r}| i\rangle \langle i| \hat G \hat V | j \rangle e^{-i\omega t + \eta t} \\
+            &= \sum_{i,j} G_{i,j} \langle j|\mathbf{r}\rangle \langle\mathbf{r}| i\rangle \langle i| \hat V | j \rangle e^{-i\omega t + \eta t} \\
+        \implies \hat \chi(t) &= \sum_{i,j} G_{i,j}\, \langle i| \hat V|j\rangle \, e^{-i\omega t + \eta t}\; | i \rangle\!\langle j |
+    \end{aligned}
+    \end{equation}
+    The total potential $\hat V$ is the sum of external potential $\hat V_\text{ext}$ and the potential induced by the variation of the charge density, i.e.
+    \begin{equation} \label{eq:def_dielectric_function}
+        \hat V_\text{ext}(t) 
+            = \left( \mathds{1} - \hat V_\text{Coulomb}\hat\chi \right) \hat V
+            = \hat \varepsilon \hat V \;,
+    \end{equation}
+    where $\hat V_\text{Coulomb}$ is the Coulomb interaction potential and $\hat\varepsilon$ is the dielectric function. If we assume that $\hat V$ is diagonal (\textbf{TODO:} why?), then in position representation eq. \eqref{eq:def_dielectric_function} reads\footnote{ %
+At point $\mathbf{r}$ we have
+    \begin{equation*}
+    \begin{aligned}
+        \langle \mathbf{r}|\hat V_\text{ext} | \mathbf{r} \rangle 
+            &= \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \int \!\! \text{d}^3 r' \;  \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|}\, \delta \langle \hat N(\mathbf{r'}) \rangle \\
+            &\overset{\eqref{eq:def_chi_function}}{=} \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \int\!\! \text{d}^3 r' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \sum_{i,j} G_{i,j} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle\langle i | \hat V | j \rangle \\
+            &= \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \!\! \int\!\! \text{d}^3 r''' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r'''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r'''} \rangle\; . \\
+            &= \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r''} \rangle\; .
+    \end{aligned}
+    \end{equation*}
+} % end footnote
+    \begin{equation*}
+        \langle \mathbf{r}|\hat V_\text{ext} | \mathbf{r} \rangle 
+            = \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r''} \rangle\; .
+    \end{equation*}
+
+
+\section{Application}
+
+\begin{comment}
+    Consider a lattice with $N$ atomic sites where each atom contributes exactly one electron to the valence band. Let $\mathbb{C}^N$ be the Hilbert space of our problem, where $N$ is the number of atomic sites. Here, we assume that each atom contributes exactly one electron to the valence band. $N$: $\operatorname{dim}\,\mathcal{H} = N$. The system is described by a hermitian hamiltonian $H \in \mathcal{B}\left(\mathcal{H}\right)$ with eigenenergies $E_i \in \mathbb{R}$ and eigenstates $|\psi_i\rangle \in \mathcal{H}$ (here, $i \in {0,\dots,N-1}$). 
+    
+    Within the RPA (Random Phase Approximation) we define the dielectic function as follows. Let electrons in the material be subject to an external perturbation $\hat V_\text{ext} \in \mathcal{B}(\mathcal{H})$ Dielectric function $\hat\varepsilon: \mathbb{R} \to \mathcal{B}\left(\mathcal{H}\right)$ is defined by
+    \begin{equation*}
+    |\phi_\text{ext}\rangle = \hat\varepsilon(\omega)|\phi_\text{tot}(\omega)\rangle\; ,
+    \end{equation*}
+    where $\phi_\text{tot}\rangle$ is the total potential in 
+
+
+
+    We start with a simple tight-binding approximation where only nearest neighbour hoppings are non-zero. By exact diagonalization of the hamiltonian $\mathcal{H} \in \mathbb{C}^{N \times N}$ eigenenergies $E \in \mathbb{R}^N$ and eigenstates $\psi \in \mathbb{C}^{N \times N}$ are obtained.
+
+    The dielectric function $\varepsilon(\omega) \in \mathbb{C}^{N \times N}$ is then calculated using the following equation
+    \begin{equation}
+        \varepsilon(\omega)_{a,b} = \mathds{1} - V\cdot\chi(\omega) 
+                                  \equiv \mathds{1} - \sum_{n=0}^{N-1} V_{a,n}\chi(\omega)_{n,b}\;,
+    \label{eq:dielectric}
+    \end{equation}
+    where $V \in \mathbb{C}^{N \times N}$ is the Coulomb interaction potential defined as
+    \begin{equation}
+        V_{a,b} = 
+            \begin{dcases} 
+                \frac{1}{4\pi\epsilon_0} \frac{e}{\|\mathbf{r_a} - \mathbf{r_b}\|} & \text{, if } a \neq b, \\
+                V_0 & \text{, if } a = b,
+            \end{dcases}
+    \label{eq:coulomb}
+    \end{equation}
+    and the polarizability matrix $\chi \in \mathbb{C}^{N \times N}$ (as follows from \cite{vonsovskiui1989quantum}) is
+    \begin{equation}
+        \chi(\omega)_{a,b} = 2\cdot \sum_{i,j\in \{0,\dots,N-1\}}\frac{f_i - f_j}{E_i - E_j - \hbar \left( \omega + i\eta\right)}\psi_{a,i}\psi_{b,i}^*\psi_{b,j}\psi_{a,j}^*.
+    \label{eq:polarizability}
+    \end{equation}
+    Here, $f \in \mathbb{R}^N$ are the occupation numbers that follow from the Fermi-Dirac distribution.
+
+    By calculating $\varepsilon(\omega)$ for a set of frequencies, we obtain the plasmon spectrum, i.e. the loss function as a function of frequency.
+\end{comment}
+
+
+\bibliography{bibliography}
+\end{document}
