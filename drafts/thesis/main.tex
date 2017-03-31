@@ -134,25 +134,25 @@
     \end{aligned}
     \end{equation}
     The total potential $\hat V$ is the sum of external potential $\hat V_\text{ext}$ and the potential induced by the variation of the charge density, i.e.
-    \begin{equation} \label{eq:def_dielectric_function}
-        \hat V_\text{ext}(t) 
-            = \left( \mathds{1} - \hat V_\text{Coulomb}\hat\chi \right) \hat V
-            = \hat \varepsilon \hat V \;,
+    \begin{equation} \label{eq:self_consistency}
+        \hat V_\text{tot}(t) 
+            = \hat V_\text{ext}(t) + \hat V_\text{Coulomb}\hat\chi(t) \; .
     \end{equation}
-    where $\hat V_\text{Coulomb}$ is the Coulomb interaction potential and $\hat\varepsilon$ is the dielectric function. If we assume that $\hat V$ is diagonal (\textbf{TODO:} why?), then in position representation eq. \eqref{eq:def_dielectric_function} reads\footnote{ %
+    where $\hat V_\text{Coulomb}$ is the Coulomb interaction potential. If we assume that $\hat V$ is diagonal (\textbf{TODO:} why?), then in position representation eq. \eqref{eq:self_consistency} reads\footnote{ %
 At point $\mathbf{r}$ we have
     \begin{equation*}
     \begin{aligned}
-        \langle \mathbf{r}|\hat V_\text{ext} | \mathbf{r} \rangle 
-            &= \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \int \!\! \text{d}^3 r' \;  \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|}\, \delta \langle \hat N(\mathbf{r'}) \rangle \\
-            &\overset{\eqref{eq:def_chi_function}}{=} \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \int\!\! \text{d}^3 r' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \sum_{i,j} G_{i,j} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle\langle i | \hat V | j \rangle \\
-            &= \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \!\! \int\!\! \text{d}^3 r''' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r'''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r'''} \rangle\; . \\
-            &= \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r''} \rangle\; .
+        \langle \mathbf{r}|\hat V_\text{ext}(t) | \mathbf{r} \rangle 
+            &= \langle \mathbf{r} | \hat V_\text{tot}(t) | \mathbf{r} \rangle - \int \!\! \text{d}^3 r' \;  \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|}\, \delta \langle \hat N(\mathbf{r'}) \rangle \\
+            &\overset{\eqref{eq:def_chi_function}}{=} \langle \mathbf{r} | \hat V | \mathbf{r} \rangle e^{-i\omega t + \eta t}- \int\!\! \text{d}^3 r' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \sum_{i,j} G_{i,j}\, e^{-i\omega t + \eta t} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle\langle i | \hat V | j \rangle \\
+            &= \left( \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \!\! \int\!\! \text{d}^3 r''' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r'''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r'''} \rangle \right) e^{-i\omega t + \eta t} \\
+            &= \left( \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r''} \rangle \right) e^{-i\omega t + \eta t} \; .
     \end{aligned}
     \end{equation*}
+Now take the Fourier transform of the above equation to obtain \textbf{TODO:} what?
 } % end footnote
     \begin{equation*}
-        \langle \mathbf{r}|\hat V_\text{ext} | \mathbf{r} \rangle 
+        \langle \mathbf{r}|\hat V_\text{ext}(\omega) | \mathbf{r} \rangle 
             = \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r''} \rangle\; .
     \end{equation*}
 
