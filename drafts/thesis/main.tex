@@ -30,18 +30,18 @@
 
 
 
-\section{Theory of Linear Response in a Nutshell}
+\section{Theory of Linear Response in a Nutshell} \label{sec:linear_response}
     \paragraph{Clasically} Consider an electron system subject to small external perturbation $V_\text{ext}(\mathbf{r}, t)$. By definition of the \textit{inverse dielectric function} the total potential $V(\mathbf{r}, t)$ is given by
-    \begin{equation} \label{eq:classical_def_inverse}
+    \begin{equation} \label{eq:cl:potentials_t}
         V(\mathbf{r}, t) 
             = \int\!\! \text{d}^3 r' \!\! \int\limits_{-\infty}^{t}\!\! \text{d} t'\; \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, t - t') V_\text{ext}(\mathbf{r'}, t')\; .
     \end{equation}
     The upper bound of the integral over $t'$ is $t$ in place of $\infty$ due to causality: the ``effect'' cannot precede the ``cause''. This is equivalent to saying that $\varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \tau) = 0$ whenever $\tau < 0$. The Fourier transform of $\varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \tau)$ is
-    \begin{equation} \label{eq:classical_dielectric_fourier}
+    \begin{equation} \label{eq:cl:inv_dielectric_w}
         \varepsilon^{-1}(\mathbf{r},\mathbf{r'},\omega) = \int\limits_{0}^{\infty} \!\! \text{d}\tau \; e^{i\omega \tau}\,\varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \tau)\; .
     \end{equation}
     Applying Titchmarsh's theorem to $\varepsilon^{-1}$, we get that $\varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \omega)$ is the limit $\eta \to 0+$ of $\varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \omega + i\eta)$ which is holomorphic in the upper complex plane.
-    Taking Fourier transform of eq. \eqref{eq:classical_def_inverse}, we obtain\footnote{ %
+    Taking Fourier transform of eq. \eqref{eq:cl:potentials_t}, we obtain\footnote{ %
 \begin{equation*}
 \begin{aligned}
     V(\mathbf{r}, \omega) 
@@ -74,12 +74,12 @@
 \end{aligned}
 \end{equation*}
 }
-    \begin{equation} \label{eq:classical_def_inverse_fourier}
+    \begin{equation} \label{eq:cl:potentials_w}
         V(\mathbf{r}, \omega) 
             = \int\!\! \text{d}^3 r' \; \varepsilon^{-1}(\mathbf{r}, \mathbf{r'}, \omega) V_\text{ext}(\mathbf{r'}, \omega)\; .
     \end{equation}
-    Eqs. \eqref{eq:classical_dielectric_fourier} and \eqref{eq:classical_def_inverse_fourier} may equivalently be formulated as 
-    \begin{equation} \label{eq:classical_result}
+    Eqs. \eqref{eq:cl:inv_dielectric_w} and \eqref{eq:cl:potentials_w} may equivalently be formulated as 
+    \begin{equation} \label{eq:cl:result_w}
     \begin{aligned}
         V_\text{ext}(\mathbf{r}, \omega) &= \int\!\! \text{d}^3 r' \varepsilon(\mathbf{r}, \mathbf{r'}, \omega) V(\mathbf{r'})\; ,\text{ where} \\
         \varepsilon(\mathbf{r},\mathbf{r'},\omega) &= \lim_{\eta \to 0+} \varepsilon(\mathbf{r}, \mathbf{r'}, \omega + i\eta) = \lim_{\eta \to 0+} \int\limits_{0}^{\infty} \!\! \text{d}\tau \; e^{i (\omega +i\eta) \tau}\,\varepsilon(\mathbf{r}, \mathbf{r'}, \tau)\; .
@@ -87,7 +87,7 @@
     \end{equation}
 
     \paragraph{Quantum Mechanically} Now consider a system of non-interacting electrons described in a single-particle approximation by a Hamiltonian $\hat H_0$. Let $E_i$ denote single-particle energy levels with corresponding eigenstates $| i \rangle$. One-particle density matrix is then
-    \begin{equation} \label{eq:rho_0}
+    \begin{equation} \label{eq:qm:rho_0}
         \hat\rho_0 = \sum_i n_i \, | i \rangle\! \langle i|\; , 
     \end{equation}
     where $n_i$ denotes the occupational number at energy $E_i$ which, in equilibrium, is given by the Fermi-Dirac distribution. Electron density operator is $\hat N(\mathbf{r}) = |\mathbf{r}\rangle \! \langle \mathbf{r}|$. Equation of motion reads
@@ -95,8 +95,8 @@
         i\hbar\frac{\text{d}\hat\rho_0}{\text{d}t} = [\hat H_0, \hat\rho_0 ] = 0\; .
     \end{equation*}
     
-    Within RPA (Random Phase Approximation) we are interested in the reponse of the system to the perturbation of the form $\hat V e^{-i(\omega + i\eta) t}$ (\textbf{TODO:} explain $\eta$). In the first order approximation, $\hat\rho = \hat\rho_0 + \hat\rho' + \mathcal{O}(\hat V^2)$, where $\hat\rho_0$ is defined by eq. \eqref{eq:rho_0} and $\hat\rho' \propto \hat V$. We thus have
-    \begin{equation} \label{eq:time_evolution_accent}
+    Within RPA (Random Phase Approximation) we are interested in the reponse of the system to the perturbation of the form $\hat V e^{-i(\omega + i\eta) t}$ (\textbf{TODO:} explain $\eta$). In the first order approximation, $\hat\rho = \hat\rho_0 + \hat\rho' + \mathcal{O}(\hat V^2)$, where $\hat\rho_0$ is defined by eq. \eqref{eq:qm:rho_0} and $\hat\rho' \propto \hat V$. We thus have
+    \begin{equation} \label{eq:qm:time_evolution}
         \left.
         \begin{aligned}
             i\hbar \frac{\text{d}\hat\rho}{\text{d}t} &= i\hbar \frac{\text{d}\hat\rho_0}{\text{d}t} + i\hbar\frac{\text{d}\hat\rho'}{\text{d}t} \\
@@ -114,70 +114,100 @@
         \langle i | [\hat V, \hat\rho_0] | j \rangle = (n_j - n_i) \langle i| \hat V | j \rangle\; .
     \end{gathered}
     \end{equation*}
-    Eq. \eqref{eq:time_evolution_accent} now reads
+    Eq. \eqref{eq:qm:time_evolution} now reads
     \begin{equation*}
          \langle i| \hat\rho' |j\rangle =
             \frac{(n_i - n_j)\, e^{-i\omega t + \eta t}}{E_i - E_j - \hbar(\omega + i\eta)} \langle i| \hat V |j \rangle \; .
     \end{equation*}
 } % end footnote
-    \begin{equation} \label{eq:g_function}
+    \begin{equation} \label{eq:qm:g_function}
     \begin{aligned}
         \langle i | \hat G \hat V | j \rangle 
             &= \frac{n_i - n_j}{E_i - E_j - \hbar(\omega + i\eta)}\langle i | \hat V | j \rangle \\
             &\equiv G_{i,j}\, \langle i | \hat V | j \rangle\; .
     \end{aligned}
     \end{equation}
-    It is important not to confuse $G_{i,j}$ with matrix element $\langle i|\hat G| j\rangle$! We can now calculate the induced electron density $\delta \langle\hat N(\mathbf{r})\rangle$, also called the \textit{polarizability matrix}:
-    \begin{equation} \label{eq:def_chi_function}
+    It is important not to confuse $G_{i,j}$ with matrix element $\langle i|\hat G| j\rangle$! We can now calculate the induced electron density $\delta\hat N(t)$:
+    \begin{equation} \label{eq:qm:chi_function_t}
     \begin{aligned}
-        \langle \mathbf{r} | \hat\chi(t) | \mathbf{r} \rangle
-            &= \delta\langle \hat N(\mathbf{r})\rangle \\
+        \langle \mathbf{r} | \delta\hat N(t) | \mathbf{r} \rangle
             &= \operatorname{Tr}(\hat N(\mathbf{r}) \hat\rho) - \operatorname{Tr}(\hat N(\mathbf{r}) \hat\rho_0) = \operatorname{Tr}(\hat N(\mathbf{r})\hat\rho') \\
             &= \sum_{i,j} \langle j|\mathbf{r}\rangle \langle\mathbf{r}| i\rangle \langle i| \hat G \hat V | j \rangle e^{-i (\omega + i\eta) t} \\
-            &= \sum_{i,j} G_{i,j} \langle j|\mathbf{r}\rangle \langle\mathbf{r}| i\rangle \langle i| \hat V | j \rangle e^{-i (\omega + i\eta) t} \\
-        \implies \hat \chi(t) &= \sum_{i,j} G_{i,j}\, \langle i| \hat V|j\rangle \, e^{-i (\omega + i\eta) t}\; | i \rangle\!\langle j |
+            &= \sum_{i,j} G_{i,j} \langle j|\mathbf{r}\rangle \langle\mathbf{r}| i\rangle \langle i| \hat V | j \rangle e^{-i (\omega + i\eta) t} \; .
     \end{aligned}
     \end{equation}
     The total potential $\hat V$ is the sum of external potential $\hat V_\text{ext}$ and the potential induced by the variation of the charge density, i.e.
-    \begin{equation} \label{eq:self_consistency}
-        \hat V_\text{tot}(t) 
-            = \hat V_\text{ext}(t) + \hat V_\text{Coulomb}\hat\chi(t) \; .
+    \begin{equation} \label{eq:qm:self_consistency_t}
+        \langle \mathbf{r} | \hat V_\text{tot}(t) | \mathbf{r} \rangle
+            = \langle \mathbf{r} | \hat V_\text{ext}(t) | \mathbf{r} \rangle + \int\!\! \text{d}^3 r' \; \langle \mathbf{r} | \hat V_\text{Coulomb} | \mathbf{r'} \rangle \langle \mathbf{r'} | \delta\hat N(t) | \mathbf{r'} \rangle \; ,
     \end{equation}
-    where $\hat V_\text{Coulomb}$ is the Coulomb interaction potential. Using the fact that $\hat V$ is diagonal, in position representation eq. \eqref{eq:self_consistency} reads\footnote{ %
+    where $\hat V_\text{Coulomb}$ is the Coulomb interaction potential. We have also used the fact that $\hat V$ is diagonal in position representation. Using eq. \eqref{eq:qm:chi_function_t} we get\footnote{ %
 At point $\mathbf{r}$ we have
     \begin{equation*}
     \begin{aligned}
         \langle \mathbf{r}|\hat V_\text{ext}(t) | \mathbf{r} \rangle 
-            &= \langle \mathbf{r} | \hat V_\text{tot}(t) | \mathbf{r} \rangle - \int \!\! \text{d}^3 r' \;  \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|}\, \delta \langle \hat N(\mathbf{r'}) \rangle \\
-            &\overset{\eqref{eq:def_chi_function}}{=} \langle \mathbf{r} | \hat V | \mathbf{r} \rangle e^{-i (\omega + i\eta) t}- \int\!\! \text{d}^3 r' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \sum_{i,j} G_{i,j}\, e^{-i (\omega + i\eta) t} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle\langle i | \hat V | j \rangle \\
+            &= \langle \mathbf{r} | \hat V_\text{tot}(t) | \mathbf{r} \rangle - \int \!\! \text{d}^3 r' \;  \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|}\, \langle \mathbf{r'} | \delta \hat N(t) | \mathbf{r'} \rangle \\
+            &\overset{\eqref{eq:qm:chi_function_t}}{=} \langle \mathbf{r} | \hat V | \mathbf{r} \rangle e^{-i (\omega + i\eta) t}- \int\!\! \text{d}^3 r' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \sum_{i,j} G_{i,j}\, e^{-i (\omega + i\eta) t} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle\langle i | \hat V | j \rangle \\
             &= \left( \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \!\! \int\!\! \text{d}^3 r''' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r'''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r'''} \rangle \right) e^{-i (\omega + i\eta) t} \\
             &= \left( \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r''} \rangle \right) e^{-i (\omega + i\eta) t} \; .
     \end{aligned}
     \end{equation*}
 } % end footnote
     \begin{equation*}
-        \langle \mathbf{r}|\hat V_\text{ext}(t) | \mathbf{r} \rangle 
-            = \left( \langle \mathbf{r} | \hat V | \mathbf{r} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r' \!\! \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r'} \|} \, \langle j |\mathbf{r'}\rangle\langle\mathbf{r'} | i \rangle \langle i | \mathbf{r''}\rangle \langle \mathbf{r''} | j \rangle \langle \mathbf{r''} | \hat V | \mathbf{r''} \rangle \right) e^{-i (\omega + i\eta) t} \; .
-    \end{equation*}
-    which can be rewritten as
-    \begin{equation*}
     \begin{aligned}
         \langle \mathbf{r} | \hat V_\text{ext}(t) | \mathbf{r} \rangle &= \int\!\! \text{d}^3 r' \; \langle \mathbf{r} | \hat \varepsilon(t) | \mathbf{r'} \rangle \langle \mathbf{r'} | \hat V | \mathbf{r'} \rangle \; , \text{ where} \\
-        \langle \mathbf{r} | \hat \varepsilon(t) | \mathbf{r'} \rangle &= \left( \langle \mathbf{r} | \mathbf{r'} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r''} \|} \, \langle j |\mathbf{r''}\rangle \langle\mathbf{r''} | i \rangle \langle i | \mathbf{r'}\rangle \langle \mathbf{r'} | j \rangle \right) \, e^{-i (\omega + i\eta) t}\; .
+        \langle \mathbf{r} | \hat \varepsilon(\tau) | \mathbf{r'} \rangle &= \left( \langle \mathbf{r} | \mathbf{r'} \rangle - \sum_{i,j} G_{i,j} \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r''} \|} \, \langle j |\mathbf{r''}\rangle \langle\mathbf{r''} | i \rangle \langle i | \mathbf{r'}\rangle \langle \mathbf{r'} | j \rangle \right) \, e^{-i (\omega + i\eta) \tau}\; .
     \end{aligned}
     \end{equation*}
     Using Titchmarsh's theorem once again, we obtain
-    \begin{equation}
+    \begin{equation} \label{eq:qm:result_w}
     \begin{aligned}
         \langle \mathbf{r} | \hat V_\text{ext}(\omega) | \mathbf{r} \rangle &= \int\!\! \text{d}^3 r' \; \langle \mathbf{r} | \hat \varepsilon(\omega) | \mathbf{r'} \rangle \langle \mathbf{r'} | \hat V | \mathbf{r'} \rangle \; , \text{ where} \\
         \langle \mathbf{r} | \hat \varepsilon(\omega) | \mathbf{r'} \rangle 
             &= \lim_{\eta \to 0+} \langle \mathbf{r} | \hat\varepsilon(\omega + i\eta) | \mathbf{r'} \rangle = \lim_{\eta \to 0+} \int\limits_{0}^{\infty} \!\! \text{d}\tau \; e^{i (\omega +i\eta) \tau}\,\langle \mathbf{r} | \varepsilon(\tau) | \mathbf{r'} \rangle \\
-            &=  \langle \mathbf{r} | \mathbf{r'} \rangle - \sum_{i,j} \lim_{\eta \to 0+} G_{i,j} \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r''} \|} \, \langle j |\mathbf{r''}\rangle \langle\mathbf{r''} | i \rangle \langle i | \mathbf{r'}\rangle \langle \mathbf{r'} | j \rangle\; ,
+            &= \langle \mathbf{r} | \mathbf{r'} \rangle - \lim_{\eta \to 0+} \sum_{i,j} G_{i,j}  \int\!\! \text{d}^3 r'' \; \frac{e^2}{\| \mathbf{r} - \mathbf{r''} \|} \, \langle j |\mathbf{r''}\rangle \langle\mathbf{r''} | i \rangle \langle i | \mathbf{r'}\rangle \langle \mathbf{r'} | j \rangle \\
+            &= \langle \mathbf{r} | \mathbf{r'} \rangle - \int\!\! \text{d}^3 r'' \;  \langle \mathbf{r} | \hat V_\text{Coulomb} | \mathbf{r''} \rangle \langle \mathbf{r''} | \hat\chi(\omega) | \mathbf{r'} \rangle\; , \\
+        \langle \mathbf{r''} | \hat\chi(\omega) | \mathbf{r'} \rangle 
+            &= \lim_{\eta \to 0+} \sum_{i,j} G_{i,j} \; \langle j |\mathbf{r''}\rangle \langle\mathbf{r''} | i \rangle \langle i | \mathbf{r'}\rangle \langle \mathbf{r'} | j \rangle \; , \\
+        \langle \mathbf{r} | \hat V_\text{Coulomb} | \mathbf{r''} \rangle &= \frac{e^2}{\|\mathbf{r} - \mathbf{r''}\|}\; ,
     \end{aligned}
     \end{equation}
-    which is the exact equivalent of eq. \eqref{eq:classical_result} in the classical description.
+    which is the exact equivalent of eq. \eqref{eq:cl:result_w} in the classical description. $\hat\chi$ is called the \textit{polarizability matrix}.
 
 \section{Application}
+    We now apply the results of sec. \ref{sec:linear_response} to a finite 2D lattice described in the tight binding approximation. We do the calculation in \textit{atomic basis}, i.e. the basis of local site wave functions $|a\rangle$ ($a \in \{0, N-1\}$, where $N$ is the number of sites). The following assumptions are made:
+    \begin{itemize}
+    \item $\langle a | b \rangle = \delta_{a,b}$,
+    \item atomic basis is complete, i.e. $\sum_{a} |a\rangle\! \langle a| = \hat{\mathds{1}}$,
+    \item $| a \rangle$'s are localized around the corresponding sites, i.e. $\langle \mathbf{r} | a \rangle \approx \delta(\mathbf{r} - \mathbf{r_a})$, where $\mathbf{r_a}$ is the position of $a$'th site. This is the key to making a step from analytical formula's to numerical calculations.
+    \end{itemize}
+    These assumptions essentially means that the step from position representation to atomic basis is performed by $|\mathbf{r}\rangle \to |a\rangle$, $\mathbf{r} \to \mathbf{r_a}$ and $\int\!\text{d}^3 r \to \sum_{a}$. Eq. \eqref{eq:qm:result_w} now reads\footnote{ %
+Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it is, however, easier to use electron-volts. We thus replace $e^2$ by $\frac{e}{4\pi\epsilon_0}$. We also introduce the \textit{self-interaction potential} $V_0$ to prevent degeneracies in $\langle a | \hat V_\text{Coulomb} | a \rangle$.
+}
+    \begin{equation} \label{eq:appl:result_w}
+    \begin{aligned}
+        \langle a | \hat V_\text{ext}(\omega) | a \rangle &= \sum_{b} \langle a | \hat \varepsilon(\omega) | b \rangle \langle b | \hat V | b \rangle \; , \text{ where} \\
+        \langle a | \hat\varepsilon(\omega) | b \rangle
+            &= \langle a | b \rangle - \sum_{c} \langle a | \hat V_\text{Coulomb} | c \rangle \langle c | \hat\chi(\omega) | b \rangle \; , \\
+        \langle a | \hat \chi(\omega) | b \rangle 
+            &= \lim_{\eta \to 0+} \sum_{i,j} G_{i,j} \langle j | c \rangle \langle c | i \rangle \langle i | b \rangle \langle b | j \rangle\; , \\
+        \langle a | \hat V_\text{Coulomb} | b \rangle 
+            &= \begin{dcases} 
+                \frac{1}{4\pi\epsilon_0} \frac{e}{\|\mathbf{r_a} - \mathbf{r_b}\|} & \text{, if } a \neq b, \\
+                V_0 & \text{, if } a = b,
+                \end{dcases}
+    \end{aligned}
+    \end{equation}
+        \begin{equation*}
+    \end{equation*}
+    The trick that allows the calculations of $\hat\chi(\omega)$ in a reasonable time is to rewrite it as a matrix product
+    \begin{equation}
+    \begin{aligned}
+        \langle a | \hat\chi(\omega) | b \rangle &= A(a,b)^\dagger\!\!\!\!\!\!\!\! \underbrace{G}_\text{square matrix}\!\!\!\!\!\!\!\!\!\!\! \overbrace{A(a,b)}^\text{column vector}\; ,\text{ where} \\
+        G_{i,j} &= \frac{n_i - n_j}{E_i - E_j - \hbar(\omega + i\eta)} \; , \\
+        A(a,b)_i &= \langle a | i \rangle \langle i | b \rangle = \langle i | b \rangle \langle i | a \rangle^* \; .
+    \end{aligned}
+    \end{equation}
 
 \begin{comment}
     Consider a lattice with $N$ atomic sites where each atom contributes exactly one electron to the valence band. Let $\mathbb{C}^N$ be the Hilbert space of our problem, where $N$ is the number of atomic sites. Here, we assume that each atom contributes exactly one electron to the valence band. $N$: $\operatorname{dim}\,\mathcal{H} = N$. The system is described by a hermitian hamiltonian $H \in \mathcal{B}\left(\mathcal{H}\right)$ with eigenenergies $E_i \in \mathbb{R}$ and eigenstates $|\psi_i\rangle \in \mathcal{H}$ (here, $i \in {0,\dots,N-1}$). 
