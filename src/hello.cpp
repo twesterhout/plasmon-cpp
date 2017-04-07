@@ -320,6 +320,9 @@ auto calculate_single( _Number const omega
 	tcm::Matrix<_C> W{epsilon.height(), 1};
 	tcm::Matrix<_C> Z{epsilon.height(), epsilon.height()};
 	tcm::lapack::geev(epsilon, W, Z);
+
+	std::cout << "W = " << W << '\n';
+	std::cout << "Z = " << Z << '\n';
 	cache("Dielectric function eigenvalues", W, file_name_eigenvalues, lg);
 	cache("Dielectric function eigenstates", Z, file_name_eigenstates, lg);
 

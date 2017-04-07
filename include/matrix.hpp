@@ -59,12 +59,13 @@ namespace tcm {
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template< class _Tp
-        , std::size_t _Align = std::alignment_of<_Tp>::value
+        , std::size_t _Align = 64 // std::alignment_of<_Tp>::value
         , class _Alloc = std::allocator<_Tp>
         >
 class Matrix {
 
 private:
+	// using _Aligned_Alloc = _Alloc;
 	using _Aligned_Alloc = boost::alignment::
 		aligned_allocator_adaptor<_Alloc, _Align>;
 	using _Storage_type = utils::_Storage<_Tp, _Aligned_Alloc>;
@@ -149,8 +150,9 @@ public:
 	Matrix(size_type const height, size_type const width)
 		: _height{ height }
 		, _width{ width }
-		, _ldim{ round_up(height) }
-		, _storage{ _ldim * _width }
+		, _ldim{ height }
+		// , _ldim{ round_up(height) }
+		, _storage{ height * width }
 	{
 	}
 
@@ -277,7 +279,8 @@ public:
 	constexpr auto cbegin_row(size_type const i) const noexcept
 		-> const_blas_iterator<value_type>
 	{ assert(i < height() and "Index out of bounds.");
-	  return const_blas_iterator<value_type>{data(i, 0), ldim()};
+	  return const_blas_iterator<value_type>{ data(i, 0),
+	      static_cast<difference_type>(ldim()) };
 	}
 	
 	
@@ -287,7 +290,8 @@ public:
 	constexpr auto begin_row(size_type const i) noexcept
 		-> blas_iterator<value_type>
 	{ assert(i < height() and "Index out of bounds.");
-	  return blas_iterator<value_type>{data(i, 0), ldim()};
+	  return blas_iterator<value_type>{ data(i, 0), 
+	      static_cast<difference_type>(ldim()) };
 	}
 
 
@@ -297,7 +301,8 @@ public:
 	constexpr auto cend_row(size_type const i) const noexcept
 		-> const_blas_iterator<value_type>
 	{ assert(i < height() and "Index out of bounds.");
-	  return const_blas_iterator<value_type>{data(i, width()), ldim()};
+	  return const_blas_iterator<value_type>{ data(i, width()),
+	      static_cast<difference_type>(ldim()) };
 	}
 
 
@@ -307,7 +312,8 @@ public:
 	constexpr auto end_row(size_type const i) noexcept
 		-> blas_iterator<value_type>
 	{ assert(i < height() and "Index out of bounds.");
-	  return blas_iterator<value_type>{data(i, width()), ldim()};
+	  return blas_iterator<value_type>{ data(i, width()), 
+	      static_cast<difference_type>(ldim()) };
 	}
 
 

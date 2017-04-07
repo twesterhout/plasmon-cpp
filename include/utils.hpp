@@ -100,8 +100,7 @@ public:
 		: _Storage{ x._get_Tp_allocator() }
 	{
 		_create_storage(x._finish - x._start);
-		std::uninitialized_copy( x._start, x._finish
-		                       , _start );
+		std::copy( x._start, x._finish, _start );
 	}
 
 	_Storage(allocator_type const& a)

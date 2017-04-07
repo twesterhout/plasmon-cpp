@@ -129,8 +129,8 @@ auto geev_impl( int const N
 	char const JOBVL = VL == nullptr ? 'N' : 'V';
 	char const JOBVR = VR == nullptr ? 'N' : 'V';
 	auto       RWORK = 
-		utils::_Storage<_T, _Alloc>{2 * static_cast<size_type>(N)};
-	// std::make_unique<_T[]>(2 * N);
+		// utils::_Storage<_T, _Alloc>{2 * static_cast<size_type>(N)};
+	       std::make_unique<_T[]>(2 * N);
 	int        LWORK = -1;
 	int        INFO  = 0;
 
@@ -144,7 +144,7 @@ auto geev_impl( int const N
 			, VL, &LDVL
 			, VR, &LDVR
 			, &_work_dummy, &LWORK
-			, RWORK.data()
+			, RWORK.get() // RWORK.data()
 			, &INFO
 		    );
 
@@ -152,9 +152,9 @@ auto geev_impl( int const N
 	}
 
 	auto       WORK  =
-		utils::_Storage<std::complex<_T>, _Alloc>{
-			static_cast<size_type>(LWORK) };
-	// std::make_unique<std::complex<_T>[]>(LWORK);
+		// utils::_Storage<std::complex<_T>, _Alloc>{
+		//	static_cast<size_type>(LWORK) };
+	    std::make_unique<std::complex<_T>[]>(LWORK);
 
 	tcm::import::geev<std::complex<_T>>
 		( &JOBVL, &JOBVR, &N
@@ -162,8 +162,8 @@ auto geev_impl( int const N
 		, W
 		, VL, &LDVL
 		, VR, &LDVR
-		, WORK.data(), &LWORK
-		, RWORK.data()
+		, WORK.get(), &LWORK // WORK.data(), &LWORK
+		, RWORK.get() // RWORK.data()
 	    , &INFO
 	    );
 

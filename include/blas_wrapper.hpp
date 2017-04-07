@@ -5,6 +5,8 @@
 #include <complex>
 #include <cassert>
 
+#include <boost/numeric/conversion/cast.hpp>
+
 #include <config.hpp>
 #include <utils.hpp>
 #include <iterator.hpp>

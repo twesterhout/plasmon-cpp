@@ -257,7 +257,7 @@ auto make( _Number const omega
 		( N, N
 		, [&Psi, &G] (auto a, auto b) { return at(a, b, Psi, G); }
 	    );
-
+	
 	LOG(lg, debug) << "Successfully calculating chi.";
 	return Chi;
 }
@@ -415,15 +415,15 @@ auto make( _Number const omega
 	assert( V.height() == N );
 
 	auto const Chi = chi_function::make(omega, E, Psi, cs, lg);
-	Matrix<_C> epsilon{N, N};
 
-	for(std::size_t i = 0; i < N; ++i)
-		epsilon(i, i) = 1.0;
+	Matrix<_C> epsilon{N, N};
+	for (std::size_t j = 0; j < N; ++j)
+		for (std::size_t i = 0; i < N; ++i)
+			epsilon(i, j) = (i == j) ? 1.0 : 0.0;
 
 	blas::gemm( blas::Operator::None, blas::Operator::None
 	          , _C{-1.0}, V, Chi
 	          , _C{ 1.0}, epsilon );
-
 
 	LOG(lg, debug) << "Successfully calculating epsilon.";
 	return epsilon;
