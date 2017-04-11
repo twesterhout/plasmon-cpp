@@ -243,7 +243,7 @@ auto gemm( Operator const op_A, Operator const op_B
          , _F const alpha, _Matrix1 const& A, _Matrix2 const& B
          , _F const beta, _Matrix3 & C ) noexcept -> void
 {
-	TCM_MEASURE("gemv<" + boost::core::demangle(typeid(_F).name()) + ">()");
+	TCM_MEASURE("gemm<" + boost::core::demangle(typeid(_F).name()) + ">()");
 	static_assert( std::is_same<typename _Matrix1::value_type, _F>::value
 	             , "Element type of _Matrix1 must match _F." );
 	static_assert( std::is_same<typename _Matrix2::value_type, _F>::value

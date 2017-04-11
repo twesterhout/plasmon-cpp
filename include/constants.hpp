@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/range/adaptor/transformed.hpp>
@@ -152,13 +153,16 @@ auto load_constants(boost::program_options::variables_map const& vm) -> _Map
 	static_assert( std::is_same<typename _Map::mapped_type, _To>::value
 	             , "Wrong mapped_type: must be _To." );
 //! [Load constants]
+	constexpr char const prefix[] = "in.constants.";
 	auto const is_constant = [](auto const& p) { 
-		return boost::algorithm::starts_with(p.first, "in.constants."); 
+		return boost::algorithm::starts_with(p.first, prefix); 
 	};
 
 	using value_type = boost::program_options::variables_map::value_type;
 	auto const mk_constant = [](value_type const& p) {
-		return std::make_pair(p.first, p.second.as<_From>());
+		return std::make_pair(boost::algorithm::erase_head_copy(
+			p.first, std::char_traits<char>::length(prefix)), 
+			p.second.as<_From>());
 	};
 
 	auto rng = vm | boost::adaptors::filtered(std::cref(is_constant))

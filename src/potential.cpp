@@ -104,7 +104,7 @@ auto make_potential( _IStream & input, _OStream & output
 {
 	using R = tcm::utils::Base<_T>;
 	auto const positions = read_positions<R>(input);
-	auto const constants = tcm::load_constants<R, double>(vm);
+	auto const constants = tcm::load_constants<R, double, std::map<std::string, R>>(vm);
 	boost::log::sources::severity_logger<tcm::severity_level> lg;
 	auto const V = tcm::coulomb::make<_T>( positions
 	                                     , constants
