@@ -1,7 +1,0 @@
-var searchData=
-[
-  ['operator_28_29',['operator()',['../classtcm_1_1Matrix.html#a691fe6e81c116c468ad8e08dd766b653',1,'tcm::Matrix::operator()(size_type const i, size_type const j) const noexcept-&gt; value_type'],['../classtcm_1_1Matrix.html#a6649f798dc3030b1fcea1543e62aac37',1,'tcm::Matrix::operator()(size_type const i, size_type const j) noexcept-&gt; reference']]],
-  ['operator_3c_3c',['operator&lt;&lt;',['../namespacetcm.html#a0b8c1ece8343e6929fc1d8b7b465c0b0',1,'tcm::operator&lt;&lt;()'],['../convert_8cpp.html#a46622b56e7b5860ebe0eed030331d620',1,'operator&lt;&lt;():&#160;convert.cpp']]],
-  ['operator_3d',['operator=',['../structtcm_1_1timing_1_1Measure.html#a05e4f56ef9ec2195d3929434a7100a03',1,'tcm::timing::Measure::operator=()'],['../classtcm_1_1Matrix.html#ae8170ff78737c77f33f329b0d07c7759',1,'tcm::Matrix::operator=()'],['../classtcm_1_1Polynomial.html#af27f61025f2bdb13de50bdb94f21b464',1,'tcm::Polynomial::operator=(Polynomial&lt; Type &gt; const &amp;p) noexcept(std::is_nothrow_copy_assignable&lt; Container &gt;()) -&gt; Polynomial&lt; T &gt; &amp;'],['../classtcm_1_1Polynomial.html#aa2d135b3c550a90aa63b640f683d7c64',1,'tcm::Polynomial::operator=(Polynomial&lt; Type &gt; &amp;&amp;p) noexcept(std::is_nothrow_move_assignable&lt; Container &gt;()) -&gt; Polynomial&lt; T &gt; &amp;']]],
-  ['operator_3e_3e',['operator&gt;&gt;',['../namespacetcm.html#a1325f9d9d637c10dd4fe228b0e27a59c',1,'tcm::operator&gt;&gt;()'],['../convert_8cpp.html#a3a2da63488a5fca1071e9986e3f620d7',1,'operator&gt;&gt;():&#160;convert.cpp']]]
-];

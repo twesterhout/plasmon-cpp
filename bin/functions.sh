@@ -114,7 +114,6 @@ calculate_potential()
 #   n2    Re[eps_n2]    Im[eps_n2]    -Im[eps_n2^(-1)]
 #   ...
 #   nN    Re[eps_nN]    Im[eps_nN]    -Im[eps_nN^(-1)]
-# where 'Li's denote the indices of eigenvalues in the initial basis.
 ###############################################################################
 max()
 {

@@ -1,17 +1,35 @@
 #ifndef TCM_BLAS_HPP
 #define TCM_BLAS_HPP
 
-
 #include <matrix.hpp>
-#include <blas_wrapper.hpp>
 #include <benchmark.hpp>
+#include <detail/blas_wrapper.hpp>
 
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \file blas.hpp
-/// \brief BLAS-like functionality
+/// \brief BLAS-like functionality.
+///
+/// \detail Three functions are provided:
+/// * #dot() to calculate inner product,
+/// * #gemv() for matrix-vector multiplication,
+/// * #gemm() for matrix-matrix multiplication.
+///
+/// Examples of usage can be found in tests/dot.cpp tests/gemv.cpp and
+/// tests/gemm.cpp.
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+/// \example tests/dot.cpp Illustrates how to use the #dot() function.
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+/// \example tests/gemv.cpp Illustrates how to use the #gemv() function.
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+/// \example tests/gemm.cpp Illustrates how to use the #gemm() function.
+///////////////////////////////////////////////////////////////////////////////
 
 
 namespace tcm {
@@ -21,18 +39,19 @@ namespace blas {
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Enum class to denote BLAS matrix operator. 
-
-/// It can be 
-/// * `None`, i.e. \f$ A \mapsto A \f$;
-/// * `T`, i.e. \f$ A \mapsto A^\text{T} \f$;
-/// * `H`, i.e. \f$ A \mapsto A^\text{H} = \left(A^\text{T}\right)^* \f$.
+/// 
+/// \detail
+/// | Value  |                         Meaning                      |
+/// | ------ | ---------------------------------------------------- |
+/// | `None` | \f$ A_{i,j} \mapsto A_{i,j} \f$                      |
+/// | `T`    | \f$ A_{i,j} \mapsto A^\text{T}_{i,j} = A_{j,i} \f$   |
+/// | `H`    | \f$ A_{i,j} \mapsto A^\text{H}_{i,j} = A_{j,i}^* \f$ |
 ///////////////////////////////////////////////////////////////////////////////
 using Operator = import::Operator;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Typedef for integers used within BLAS. Allows for a more
-/// <em>uniform</em> interface, as ATLAS may use `int`'s and Intel MKL
-/// `long int`'s...
+/// _uniform_ interface, as ATLAS may use `int`'s and Intel MKL `long int`'s...
 ///////////////////////////////////////////////////////////////////////////////
 using blas_int = import::blas_int;
 
@@ -80,7 +99,8 @@ inline
 auto dot( _Vector1 const& X
         , _Vector2 const& Y ) noexcept -> typename _Vector1::value_type
 {
-	MEASURE;
+	TCM_MEASURE( "dot<" + boost::core::demangle(typeid(typename 
+		_Vector1::value_type).name()) + ">()" );
 	static_assert( std::is_same< typename _Vector1::value_type
 	                           , typename _Vector2::value_type >::value
 				 , "Element types of vectors must match!" );
@@ -150,7 +170,7 @@ auto gemv( Operator const op_A
          , _F const alpha, _Matrix const& A, _Vector1 const& X
 	     , _F const beta,  _Vector2 & Y ) noexcept -> void
 {
-	MEASURE;
+	TCM_MEASURE("gemv<" + boost::core::demangle(typeid(_F).name()) + ">()");
 	static_assert( std::is_same<typename _Matrix::value_type, _F>::value
 				 , "Element type of _Matrix must match _F!" );
 	static_assert( std::is_same<typename _Vector1::value_type, _F>::value
@@ -162,6 +182,7 @@ auto gemv( Operator const op_A
 	assert( op_A == Operator::None 
 		? A.height() == Y.height() and A.width()  == X.height()
 	    : A.width()  == Y.height() and A.height() == X.height() );
+	// TCM_MEASURE;
 
 	gemv( op_A, A.height(), A.width()
 	    , alpha, A.data(), A.ldim(), X.data(), 1
@@ -222,7 +243,7 @@ auto gemm( Operator const op_A, Operator const op_B
          , _F const alpha, _Matrix1 const& A, _Matrix2 const& B
          , _F const beta, _Matrix3 & C ) noexcept -> void
 {
-	MEASURE;
+	TCM_MEASURE("gemv<" + boost::core::demangle(typeid(_F).name()) + ">()");
 	static_assert( std::is_same<typename _Matrix1::value_type, _F>::value
 	             , "Element type of _Matrix1 must match _F." );
 	static_assert( std::is_same<typename _Matrix2::value_type, _F>::value

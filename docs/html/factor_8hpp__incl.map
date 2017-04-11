@@ -1,9 +1,0 @@
-<map id="include/factor.hpp" name="include/factor.hpp">
-<area shape="rect" id="node2" href="$polynomial_8hpp.html" title="polynomial.hpp" alt="" coords="257,80,367,107"/>
-<area shape="rect" id="node7" href="$helper_8hpp.html" title="helper.hpp" alt="" coords="97,155,179,181"/>
-<area shape="rect" id="node10" href="$ring__traits_8hpp.html" title="Defines the Ring interface. &#160;From mathematics, a ring is a set with binary operations + and * satisfy..." alt="" coords="464,155,568,181"/>
-<area shape="rect" id="node13" href="$blas__wrapper_8hpp.html" title="Defines template versions of some BLAS routines. " alt="" coords="454,229,577,256"/>
-<area shape="rect" id="node15" href="$include_2config_8hpp.html" title="config.hpp" alt="" coords="280,304,361,331"/>
-<area shape="rect" id="node16" href="$include_2utils_8hpp.html" title="utils.hpp" alt="" coords="387,304,457,331"/>
-<area shape="rect" id="node18" href="$iterator_8hpp.html" title="iterator.hpp" alt="" coords="482,304,568,331"/>
-</map>

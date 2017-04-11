@@ -11,10 +11,10 @@
 #include <regex>
 #include <algorithm>
 
+#include <boost/core/demangle.hpp>
 
-#include <config.hpp>
-#include <logging.hpp>
 #include <benchmark.hpp>
+#include <logging.hpp>
 
 #include <constants.hpp>
 #include <matrix.hpp>
@@ -59,8 +59,6 @@ auto fermi_dirac( _F const E
 ///////////////////////////////////////////////////////////////////////////////
 namespace g_function {
 
-
-namespace {
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Computes \f$G_{i, j}(\omega)=\frac{f_i-f_j}{E_i-E_j-\omega}\f$.
 
@@ -85,8 +83,6 @@ auto at( std::size_t const i, std::size_t const j
 {
 	return (f[i] - f[j]) / (E[i] - E[j] - omega);
 }
-} // unnamed namespace
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,7 +114,8 @@ auto make( _Number const omega
          , std::map<std::string, _R> const& cs 
          , _Logger & lg ) -> Matrix<T>
 {
-	MEASURE;
+	TCM_MEASURE( "g_function::make<" + boost::core::demangle(typeid(T).name()) 
+	           + ">()" );
 	LOG(lg, debug) << "Calculating G for omega = " << omega << "...";
 
 	require(__PRETTY_FUNCTION__, cs, "temperature");
@@ -194,7 +191,8 @@ auto at( std::size_t const a, std::size_t const b
        , Matrix<_C> const& Psi
        , Matrix<_C> const& G ) -> _C
 {
-	MEASURE;
+	TCM_MEASURE( "chi_function::at<" + boost::core::demangle(
+		typeid(_C).name()) + ">()" );
 
 	const auto N = Psi.height();
 	Matrix<_C>    A{N, 1};
@@ -244,7 +242,8 @@ auto make( _Number const omega
          , std::map<std::string, _R> const& cs
          , _Logger & lg ) -> Matrix<_C>
 {
-	MEASURE;
+	TCM_MEASURE( "chi_function::make<" + boost::core::demangle(
+		typeid(_C).name()) + ">()" );
 	LOG(lg, debug) << "Calculating chi for omega = " << omega << "...";
 
 	const auto N = E.height();
@@ -287,7 +286,6 @@ auto distance(std::array<_F, 3> const& v, std::array<_F, 3> const& w)
 } // unnamed namespace
 
 
-namespace {
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Calculates \f$ V_{i,j} \f$.
 
@@ -326,7 +324,6 @@ auto at( std::size_t const i, std::size_t const j
 		? v0
 		: e / (_R{4.0} * pi * eps0 * distance(positions[i], positions[j]));
 }
-} // unnamed namespace
 
 
 
@@ -351,7 +348,8 @@ auto make( std::vector<std::array<_F, 3>> const& positions
          , std::map<std::string, _R> const& cs 
          , _Logger & lg ) -> Matrix<_T>
 {
-	MEASURE;
+	TCM_MEASURE( "coulomb::make<" + boost::core::demangle(
+		typeid(_T).name()) + ">()" );
 	LOG(lg, debug) << "Calculating V...";
 
 	require(__PRETTY_FUNCTION__, cs, "elementary-charge");
@@ -404,7 +402,8 @@ auto make( _Number const omega
          , std::map<std::string, _R> const& cs 
          , _Logger & lg )
 {
-	MEASURE;
+	TCM_MEASURE( "dielectric_function::make<" + boost::core::demangle(
+		typeid(_C).name()) + ">()" );
 	LOG(lg, debug) << "Calculating epsilon for omega = " << omega << "...";
 
 	const auto N = E.height();

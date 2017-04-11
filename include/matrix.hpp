@@ -10,22 +10,18 @@
 
 #include <boost/align/aligned_allocator_adaptor.hpp>
 
-#include <utils.hpp>
-#include <iterator.hpp>
+#include <detail/utils.hpp>
+#include <detail/iterator.hpp>
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// \file matrix.hpp
+/// \file include/matrix.hpp
 /// \brief This file implements a Matrix class and some operations associated
 ///        with it.
 ///////////////////////////////////////////////////////////////////////////////
 
 
 namespace tcm {
-
-
-
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
