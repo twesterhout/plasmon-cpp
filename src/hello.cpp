@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <map>
 
-
 #include <boost/program_options.hpp>
 #include <boost/log/sources/logger.hpp>
 #include <boost/archive/binary_iarchive.hpp>
@@ -12,9 +11,6 @@
 #include <boost/serialization/map.hpp>
 #include <boost/mpi.hpp>
 
-
-
-#include <config.hpp>
 #include <benchmark.hpp>
 #include <logging.hpp>
 
@@ -224,7 +220,7 @@ auto load_ipackage(po::variables_map const& vm) -> IPackage<R, C, R>
 	       , load_matrix<R>(vm["in.file.energies"].as<std::string>())
 	       , load_matrix<C>(vm["in.file.states"].as<std::string>())
 	       , load_matrix<C>(vm["in.file.potential"].as<std::string>())
-		   , tcm::load_constants<R, double>(vm)
+		   , tcm::load_constants<R, double, std::map<std::string, R>>(vm)
 		   };
 }
 

@@ -1,11 +1,9 @@
 #ifndef TCM_LAPACK_HPP
 #define TCM_LAPACK_HPP
 
-
-#include <utils.hpp>
-#include <hermitian.hpp>
-#include <general.hpp>
 #include <matrix.hpp>
+#include <detail/hermitian.hpp>
+#include <detail/general.hpp>
 
 
 namespace tcm {
