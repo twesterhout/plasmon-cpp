@@ -65,7 +65,6 @@ template< class _Tp
 class Matrix {
 
 private:
-	// using _Aligned_Alloc = _Alloc;
 	using _Aligned_Alloc = boost::alignment::
 		aligned_allocator_adaptor<_Alloc, _Align>;
 	using _Storage_type = utils::_Storage<_Tp, _Aligned_Alloc>;
@@ -150,8 +149,8 @@ public:
 	Matrix(size_type const height, size_type const width)
 		: _height{ height }
 		, _width{ width }
-		, _ldim{ height }
-		// , _ldim{ round_up(height) }
+		// , _ldim{ height }
+		, _ldim{ round_up(height) }
 		, _storage{ height * width }
 	{
 	}
