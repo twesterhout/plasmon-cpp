@@ -186,7 +186,7 @@ At point $\mathbf{r}$ we have
     \item atomic basis is complete, i.e. $\sum_{a} |a\rangle\! \langle a| = \hat{\mathds{1}}$,
     \item $| a \rangle$'s are localized around the corresponding sites, i.e. $\langle \mathbf{r} | a \rangle \approx \delta(\mathbf{r} - \mathbf{r_a})$, where $\mathbf{r_a}$ is the position of $a$'th site. This is the key to making a step from analytical formulas to numerical calculations.
     \end{itemize}
-    These assumptions essentially means that the step from position representation to atomic basis is performed by $|\mathbf{r}\rangle \to |a\rangle$, $\mathbf{r} \to \mathbf{r_a}$ and $\int\!\text{d}^3 r \to \sum_{a}$. Eq. \eqref{eq:qm:result_w} now reads\footnote{ %
+    These assumptions essentially mean that the step from position representation to atomic basis is performed by $|\mathbf{r}\rangle \to |a\rangle$, $\mathbf{r} \to \mathbf{r_a}$ and $\int\!\text{d}^3 r \to \sum_{a}$. Eq. \eqref{eq:qm:result_w} now reads\footnote{ %
 Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it is, however, easier to use electron-volts. We thus replace $e^2$ by $\frac{e}{4\pi\epsilon_0}$. We also introduce the \textit{self-interaction potential} $V_0$ to prevent degeneracies in $\langle a | \hat V_\text{Coulomb} | a \rangle$.
 }
     \begin{equation} \label{eq:appl:result_w}
@@ -218,21 +218,30 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \end{equation}
     The second form of $\langle a | \hat \chi(\omega) | b \rangle$ with a lot of transposes may seem strange, but it is of utmost importance. It allows us to calculate matrix elements of $\hat \chi(\omega)$ using just two \texttt{BLAS} operations: matrix-vector product (\texttt{GEMV}) and dot-product (\texttt{DOT}). It is now straightforward to write a highly parallel implementation of eq. \eqref{eq:appl:computing_chi} and it will not be discussed here any further.
 
-    With eqs. \eqref{eq:appl:result_w} and \eqref{eq:appl:computing_chi} implemented, we can obtain $\hat \varepsilon(\omega)$ for any system, given its tight-binding Hamiltonian $\hat H$ and sites positions $\big\{\mathbf{r_a} |\, a \in \{0,\dots,N-1\}\big\}$. The measurable quantity (\textbf{TODO:} give links to experiments) is the \textit{loss function} $-\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right]$, where $|\mathbf{q}\rangle$'s denote momentum eigenfunctions. Let $\epsilon_n(\omega)$'s be eigevalues of $\hat\varepsilon(\omega)$ with the corresponding eigenfunctions $|\phi_n(\omega)\rangle$'s. We can now express the loss function as
-    \begin{equation}
-    -\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right] = -\operatorname{Im}\left[ \sum_{n,m} \langle \mathbf{q} | \phi_n(\omega) \rangle \langle \phi_n(\omega) | \hat
-    \end{equation}
+    With eqs. \eqref{eq:appl:result_w} and \eqref{eq:appl:computing_chi} implemented, we can obtain $\hat \varepsilon(\omega)$ for any system, given its tight-binding Hamiltonian $\hat H$ and sites positions $\big\{\mathbf{r_a} |\, a \in \{0,\dots,N-1\}\big\}$. The measurable quantity (\textbf{TODO:} give links to articles about EELS experiments) is the \textit{loss function}\ \  $-\!\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right]$, where $|\mathbf{q}\rangle$'s denote momentum eigenfunctions. Let $\epsilon_n(\omega)$'s be eigevalues of $\hat\varepsilon(\omega)$ with the corresponding eigenfunctions $|\phi_n(\omega)\rangle$'s. We can now express the loss function as\footnote{ %
+    Obviously, if $\epsilon_n(\omega)$ is an eigenvalue of $\hat \varepsilon(\omega)$ with an eigenvector $|\phi_n(\omega)\rangle$, then $1\!/\!\epsilon_n(\omega)$ is an eigenvalue of $\hat \varepsilon^{-1}(\omega)$ with the same eigenvector. We thus have
+    \begin{multline*}
+    -\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right] = -\operatorname{Im}\left[ \sum_{n,m} \langle \mathbf{q} | \phi_n \rangle \langle \phi_n | \hat \varepsilon^{-1}(\omega) | \phi_m \rangle \langle \phi_m | \mathbf{q} \rangle \right] \\ = -\operatorname{Im}\left[ \sum_{n} |\langle \mathbf{q} | \phi_n(\omega) \rangle|^2 \frac{1}{\epsilon_n(\omega)} \right] = - \sum_{n} |\langle \mathbf{q} | \phi_n(\omega) \rangle|^2\cdot \operatorname{Im}\left[ \frac{1}{\epsilon_n(\omega)} \right]\; .
+    \end{multline*}
+} % end footnote
+    \begin{equation*}
+        -\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right] = - \sum_{n} |\langle \mathbf{q} | \phi_n(\omega) \rangle|^2\cdot \operatorname{Im}\left[ \frac{1}{\epsilon_n(\omega)} \right]\; .
+    \end{equation*}
+    Within the tight-binding approximation $\langle \mathbf{q} | \phi_n(\omega) \rangle$ can be calculated as follows
+    \begin{equation*}
+        \langle \mathbf{q} | \phi_n(\omega) \rangle = \sum_{a} \!\int\!\!\text{d}^3 r \; \langle \mathbf{q} | \mathbf{r} \rangle \langle \mathbf{r} | a \rangle \langle a | \phi_n(\omega) \rangle = \sum_{a} \langle \mathbf{q} | \mathbf{r_a} \rangle \langle a | \phi_n(\omega) \rangle = \frac{1}{(2\pi)^{3/2}} \sum_{a} e^{-i\mathbf{q}\cdot\mathbf{r_a}} \langle a | \phi_n(\omega) \rangle \; .
+    \end{equation*}
 
 \newpage
 \section{Experiments}
 
 \subsection{Third iteration Sierpinski carpet}
 
-    \begin{figure}[h]
-    \center
-    \input{far-away-look.tex}
-    \caption{Third iteration Sierpinski carpet.}
-    \end{figure}
+%    \begin{figure}[h]
+%    \center
+%    \input{far-away-look.tex}
+%    \caption{Third iteration Sierpinski carpet.}
+%    \end{figure}
 
 
 \begin{comment}
