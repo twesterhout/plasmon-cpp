@@ -20,6 +20,7 @@ SPECTRUM=
 PLASMONS=
 IPR_CORR=
 COMMANDS=
+WAVEVECTOR=
 
 
 for i in "$@"; do
@@ -69,6 +70,9 @@ for i in "$@"; do
         --potential=*)
             POTENTIAL="${i#*=}"
         ;;
+        --wave-vector=*)
+            WAVEVECTOR="${i#*=}"
+        ;;
         --commands=*)
             COMMANDS="${i#*=}"
         ;;
@@ -83,6 +87,7 @@ done
 [[ "${DEPTH}x" = "x" ]]            && { echo "Need the '--depth' argument!" 1>&2; exit -1; }
 [[ "${LATTICE_CONSTANT}x" = "x" ]] && { echo "Need the '--lattice-constant' argument!" 1>&2; exit -1; }
 [[ "${HOPPING_VALUE}x" = "x" ]]    && { echo "Need the '--hopping-value' argument!" 1>&2; exit -1; }
+[[ "${WAVEVECTOR}x" = "x" ]]       && { echo "Need the '--wave-vector' argument!" 1>&2; exit -1; }
 [[ "${COMMANDS}x" = "x" ]]         && { echo "Need the '--commands' argument!" 1>&2; exit -1; }
 [[ "${TYPE}x" = "x" ]]        && TYPE="cdouble"
 [[ "${SAMPLE_TYPE}x" = "x" ]] && SAMPLE_TYPE="sierpinski:carpet"
@@ -112,6 +117,7 @@ echo "[***] HAMILTONIAN      = ${HAMILTONIAN}" 1>&2
 echo "[***] ENERGIES         = ${ENERGIES}" 1>&2
 echo "[***] STATES           = ${STATES}" 1>&2
 echo "[***] POTENTIAL        = ${POTENTIAL}" 1>&2
+echo "[***] WAVEVECTOR       = ${WAVEVECTOR}" 1>&2
 echo "[***] COMMANDS         = ${COMMANDS}" 1>&2
 
 
@@ -151,6 +157,9 @@ for i in "${COMMANDS_LIST[@]}"; do
         ;;
         filter)
             filter_plasmons 1
+        ;;
+        loss)
+            loss_spectrum "$WAVEVECTOR"
         ;;
         *)
             echo "Unknown command: $i" 1>&2

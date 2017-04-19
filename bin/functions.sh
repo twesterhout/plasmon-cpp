@@ -4,7 +4,7 @@ set -e
 set -u
 set -o pipefail
 
-NBR='[+-]?[0-9]+\.?[0-9]*([eE][+-][0-9]+)?'
+NBR='[+-]?[0-9]+\.?[0-9]*([eE][+-]?[0-9]+)?'
 CMPL='\(('$NBR'),('$NBR')\)'
 
 
@@ -121,6 +121,7 @@ max()
                           return 1; }
     declare -r -i N="$1"
 
+# Sort according to -Im[eps^-1(omega)]
     cat \
         | "$BIN/convert" --from bin --to text --type "$TYPE" \
         | nl \
@@ -163,14 +164,47 @@ plasmon_spectrum()
     echo -e "freq\tindex\treal\timag\tloss" >> "$spectrum"
 
     declare freq
+    tput sc 1>&2 # save cursor position
     for f in ${EPS_BASE}.*.eigenvalues.bin; do
         freq=$(echo "$f" | sed -E "s/$EPS_BASE\.($NBR)\.eigenvalues.bin/\1/")
-        echo "[*] frequency = $freq ..." 1>&2
+        tput rc 1>&2 # restore cursor position
+        echo -n "[*] frequency = $freq ..." 1>&2
         cat "$f" \
             | max $N \
             | tail -n 1 \
             | awk -F'\t' '{ printf("%.6f\t%s\n", '$freq', $0); }'
     done | sort -s -g -k 1 >> "$spectrum"
+    echo 1>&2
+}
+
+
+loss_spectrum()
+{
+    [[ "$#" -eq 1 ]] || { echo "$FUNCNAME takes exactly one argument: <q>." 1>&2
+                          return 1; }
+    declare -r q=$(echo "$1" | sed -E 's/\(\s*('$NBR')\s*,\s*('$NBR')\s*,\s*('$NBR')\s*\)/(\1,\3,\5)/g')
+    declare -r spectrum="${SPECTRUM/%.dat/.q=${q}.dat}"
+
+    echo -e "# Energy loss spectrum for EPS_BASE = '$EPS_BASE'" > "$spectrum"
+    echo -e "# q = $q" >> "$spectrum"
+    echo -e "freq\teps_r\teps_i\tloss_r\tloss_i" >> "$spectrum"
+
+    declare freq
+    tput sc 1>&2 # save cursor position
+    for f in ${EPS_BASE}.*.eigenvalues.bin; do
+        freq=$(echo "$f" | sed -E "s/$EPS_BASE\.($NBR)\.eigenvalues.bin/\1/")
+        tput rc 1>&2 # restore cursor position
+        echo -n "[*] frequency = $freq ..." 1>&2
+
+        echo -e -n "$freq\t"
+        $BIN/loss_function \
+                --type "$TYPE" \
+                --epsilon-eigenvalues "${EPS_BASE}.${freq}.eigenvalues.bin" \
+                --epsilon-eigenstates "${EPS_BASE}.${freq}.eigenstates.bin" \
+                --positions "$COORDINATES" \
+                --q "$q"
+    done | sort -s -g -k1 >> "$spectrum"
+    echo 1>&2 # add a trailing newline
 }
 
 
@@ -190,7 +224,9 @@ eigenstate()
     declare -r coordinates="$COORDINATES"
     declare -r eigenmode="${EPS_BASE}.${freq}.${N}.eigenstate.dat"
 
-    echo "[*] frequency = $freq, N = $N ..." 1>&2
+    tput sc
+    echo -n "[*] frequency = $freq, N = $N ..." 1>&2
+    tput rc
 
     # Check whether we actually have to do anything
     [[ -f "$eigenmode" ]] && return 0
