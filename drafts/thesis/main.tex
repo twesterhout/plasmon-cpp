@@ -256,6 +256,7 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \caption{Third iteration Sierpinski carpet. $x$ and $y$ coordinates are given in terms of lattice constant. Width of the sample is $3^3 = 27$ unit cells. In this case we chose the lattice constant of graphene $a \approx 0.246$ nm, which results in the total width of about six and a half nanometers.}
     \label{fig:coordinates-3rd-SC}
     \end{figure}
+
 \subsection{Third iteration Sierpinski carpet}
     We start by examining a small system --- third iteration Siepinski carpet. The sample is shown in fig. \ref{fig:coordinates-3rd-SC}. Using TIPSI Python package we can construct a tight-binding Hamiltonian for the problem. Hopping value of $2.8$ eV is used. As we need eigenenergies and eigenstates anyway to make use of eq. \eqref{eq:appl:result_w}, we can have a look at the density of states (fig. \ref{fig:dos-3rd-SC}). 
     \begin{figure}[h] 
@@ -268,13 +269,43 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
 
     \begin{figure}[h] 
     \center
+    \input{Spectrum-3rd-SC-Asymptotic.tex}
+    \caption{This plot shows asymptotic behavior of the loss function at high frequencies. ``Numerical'' denotes the results of the precise numerical calculation. ``Fit'' is obtained by fitting $a / ((b - \omega)^2 + c^2)$ (i.e. eq. \eqref{eq:exp:asymptotic_approx}) to the results of numerical calculations. LSA (Least Square Approximation) gives the following values for the parameters: $a = 1.031 \times 10^{-2}$, $b = 19.779$, $c = 8 \times 10^{-4}$.}
+    \label{fig:spectrum-3rd-SC-Asymptotic}
+    \end{figure}
+    To calculate the dielectric function, we need to choose a couple more parameters of the system. For now, we, again, follow \cite{plasmonic2015} and let the temperature $T$ of the system be $300$ K, chemical potential $\mu = 0.4$ eV, self-interaction coulomb potential $V_0 = 15.78$ eV, and the ``inverse relaxation time'' $\hbar\eta = 0.006$ eV.
+    
+    Having chosen all configuration parameters we calculate $\hat \varepsilon(\omega)$ for frequencies up to $\approx\! 22$ eV. The two extra eV allow us to look at asymptotic behavior at high frequencies. Let's ignore for a minute the fact that $\hat\epsilon(\omega)$ is a matrix. Using eq. \eqref{eq:appl:result_w} we can approximate the dielectric function by 
+    \begin{equation*}
+        \epsilon(\omega) \approx 1 - \frac{A}{B - \omega + i\cdot C} \; ,
+    \end{equation*}
+    and the loss function becomes\footnote{ %
+    \begin{equation*}
+        \begin{aligned}
+        -\operatorname{Im}[\epsilon(\omega)^{-1}] &= -\operatorname{Im}\left[\left(1 - \frac{A}{B - \omega + i\cdot C}\right)^{-1}\right]
+        = -\operatorname{Im}\left[\frac{B - \omega + i\cdot C}{B - A - \omega + i\cdot C}\right] \\
+        &= -\operatorname{Im}\left[\frac{(B - \omega + i\cdot C)(B - A - \omega - i\cdot C)}{(B - A - \omega)^2 + C^2}\right]
+        = -\frac{-C(B - \omega) + C(B - A - \omega)}{(B - A - \omega)^2 + C^2} \\
+        &= \frac{CA}{(B - A - \omega)^2 + C^2} \; .
+        \end{aligned}
+    \end{equation*}
+    } % end footnote
+    \begin{equation} \label{eq:exp:asymptotic_approx}
+        -\operatorname{Im}[\epsilon(\omega)^{-1}] \approx \frac{a}{(b - \omega)^2 + c^2} \;,\text{ where }a=AC ,\;\; b = B-A ,\;\; c = C\;.
+    \end{equation}
+    Fig. \ref{fig:spectrum-3rd-SC-Asymptotic} shows how good this approximation actually is. This verifies our hypothesis that $\underset{i,j}{\operatorname{max}}|E_i - E_j|$ is a reasonable upper bound for plasmon frequencies.
+
+    \begin{figure}[h] 
+    \center
     \input{Spectrum-3rd-SC-Far-Away.tex}
-    \caption{Loss function spectrum. The spectrum is highly fluctuating (but not self-similar). This suggests that there are many plasmons.}
+    \caption{Loss function spectrum. The spectrum is highly fluctuating (but not self-similar). This makes one wonder whether this spectrum represents actual physical results. Our definition of the loss function may just be ill-formed. Zoomed-in plot shows that this is not the case.}
     \label{fig:spectrum-3rd-SC-far-away}
     \end{figure}
-    Calculating the loss function $-\operatorname{Im}[ \epsilon_{n(\omega)}^{-1}(\omega)]$ for frequencies up to $\approx\! 22$ eV results in the spectrum shown on fig. \ref{fig:spectrum-3rd-SC-far-away}. High number of sharp peaks suggests either that there are plenty of plasmons in the sample or that our definition of the loss function is ill formed. A higher resolution plot shows that the loss function is smooth around its maxima. Its derivative experiences a discontinuity at \textit{almost every} minima, which suggests that our definition it not perfect after all. We will discuss the alternatives later. 
 
-    It is interesting to compare the classical, $\varepsilon(\omega) = 0$, definition of plasmon, which in our case is $\operatorname{Re}[\epsilon_{n(\omega)}(\omega)] = 0$, with the condition that loss function has a local maximum. For this we will focus on the low-energy part of the spectrum in fig. \ref{fig:spectrum-3rd-SC-far-away} as low-energy plasmon modes are easier to excite experimentally (\textbf{TODO:} this is my intuition, but is it actually true?).
+    Spectrum for the full range of frequencies is shown on fig. \ref{fig:spectrum-3rd-SC-far-away}. With our definition of a plasmon high number of sharp peaks means that there are plenty of plasmons. It is interesting to compare the classical definition of plasmon to the condition that loss function has a local maximum. For this we focus on the low-energy part of the spectrum in fig. \ref{fig:spectrum-3rd-SC-far-away} as low-energy plasmon modes are easier to excite experimentally (\textbf{TODO:} this is my intuition, but is it actually true?).
+
+
+
     \begin{figure}[h] 
     \center
     \input{Spectrum-3rd-SC.tex}
