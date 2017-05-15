@@ -17,6 +17,9 @@
 \usepackage{verbatim}
 \usepackage[inline]{enumitem}
 
+\usepackage{caption}
+\usepackage{wrapfig}
+
 \usepackage{tikz}
 
 \usepackage{cite}
@@ -31,6 +34,7 @@
 
 
 \section{Theory of Linear Response in a Nutshell} \label{sec:linear_response}
+    This section summarizes some important derivations from \cite{vonsovskiui1989quantum} and \cite{giuliani2005quantum} that are crutial for further calculations.
     \paragraph{Classically} Consider an electron system subject to small external perturbation $V_\text{ext}(\mathbf{r}, t)$. By definition of the \textit{inverse dielectric function} the total potential $V(\mathbf{r}, t)$ is given by
     \begin{equation} \label{eq:cl:potentials_t}
         V(\mathbf{r}, t) 
@@ -95,7 +99,7 @@
         i\hbar\frac{\text{d}\hat\rho_0}{\text{d}t} = [\hat H_0, \hat\rho_0 ] = 0\; .
     \end{equation*}
     
-    Within RPA (Random Phase Approximation) we are interested in the reponse of the system to the perturbation of the form $\hat V e^{-i(\omega + i\eta) t}$ (\textbf{TODO:} explain $\eta$). In the first order approximation, $\hat\rho = \hat\rho_0 + \hat\rho' + \mathcal{O}(\hat V^2)$, where $\hat\rho_0$ is defined by eq. \eqref{eq:qm:rho_0} and $\hat\rho' \propto \hat V$. We thus have
+    Within RPA (Random Phase Approximation) we are interested in the reponse of the system to the perturbation of the form $\hat V e^{-i(\omega + i\eta) t}$.\footnote{Notice the appearance of $\eta$. It may be viewed either mathematically, as trick to be able to use eq. \ref{eq:cl:result_w}, or physically, as an adiabatic turning on of the potential. For further discussion of the significance of this factor, see \cite{1972causality}} In the first order approximation, $\hat\rho = \hat\rho_0 + \hat\rho' + \mathcal{O}(\hat V^2)$, where $\hat\rho_0$ is defined by eq. \eqref{eq:qm:rho_0} and $\hat\rho' \propto \hat V$. We thus have
     \begin{equation} \label{eq:qm:time_evolution}
         \left.
         \begin{aligned}
@@ -186,7 +190,7 @@ At point $\mathbf{r}$ we have
     \item atomic basis is complete, i.e. $\sum_{a} |a\rangle\! \langle a| = \hat{\mathds{1}}$,
     \item $| a \rangle$'s are localized around the corresponding sites, i.e. $\langle \mathbf{r} | a \rangle \approx \delta(\mathbf{r} - \mathbf{r_a})$, where $\mathbf{r_a}$ is the position of $a$'th site. This is the key to making a step from analytical formulas to numerical calculations.
     \end{itemize}
-    These assumptions essentially mean that the step from position representation to atomic basis is performed by $|\mathbf{r}\rangle \to |a\rangle$, $\mathbf{r} \to \mathbf{r_a}$ and $\int\!\text{d}^3 r \to \sum_{a}$. Eq. \eqref{eq:qm:result_w} now reads\footnote{ %
+    These assumptions essentially mean that the step from position representation to atomic basis is performed by $|\mathbf{r}\rangle \to |a\rangle$, $\mathbf{r} \to \mathbf{r_a}$ and $\int\!\text{d}^3 r \to \sum_{a}$. Another important step is to replace $\hat G$ by $2\hat G$. Now $i$ and $j$ indices also run from 0 to $N-1$. Eq. \eqref{eq:qm:result_w} now reads\footnote{ %
 Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it is, however, easier to use electron-volts. We thus replace $e^2$ by $\frac{e}{4\pi\epsilon_0}$. We also introduce the \textit{self-interaction potential} $V_0$ to prevent degeneracies in $\langle a | \hat V_\text{Coulomb} | a \rangle$.
 }
     \begin{equation} \label{eq:appl:result_w}
@@ -195,7 +199,7 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
         \langle a | \hat\varepsilon(\omega) | b \rangle
             &= \langle a | b \rangle - \sum_{c} \langle a | \hat V_\text{Coulomb} | c \rangle \langle c | \hat\chi(\omega) | b \rangle \; , \\
         \langle a | \hat \chi(\omega) | b \rangle 
-            &= \lim_{\eta \to 0+} \sum_{i,j} \langle i | \hat G | j \rangle \langle j | a \rangle \langle a | i \rangle \langle i | b \rangle \langle b | j \rangle\; , \\
+            &= 2\cdot \lim_{\eta \to 0+} \sum_{i,j} \langle i | \hat G | j \rangle \langle j | a \rangle \langle a | i \rangle \langle i | b \rangle \langle b | j \rangle\; , \\
         \langle a | \hat V_\text{Coulomb} | b \rangle 
             &= \begin{dcases} 
                 \frac{1}{4\pi\epsilon_0} \frac{e}{\|\mathbf{r_a} - \mathbf{r_b}\|} & \text{, if } a \neq b, \\
@@ -203,9 +207,7 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
                 \end{dcases}
     \end{aligned}
     \end{equation}
-        \begin{equation*}
-    \end{equation*}
-    
+
     The trick that allows the calculations of $\hat\chi(\omega)$ in a reasonable time is to rewrite it in terms of matrices:
     \begin{equation} \label{eq:appl:computing_chi}
     \begin{aligned}
@@ -218,7 +220,10 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \end{equation}
     The second form of $\langle a | \hat \chi(\omega) | b \rangle$ with a lot of transposes may seem strange, but it is of utmost importance. It allows us to calculate matrix elements of $\hat \chi(\omega)$ using just two \texttt{BLAS} operations: matrix-vector product (\texttt{GEMV}) and dot-product (\texttt{DOT}). It is now straightforward to write a highly parallel implementation of eq. \eqref{eq:appl:computing_chi} and it will not be discussed here any further.
 
-    With eqs. \eqref{eq:appl:result_w} and \eqref{eq:appl:computing_chi} implemented, we can obtain $\hat \varepsilon(\omega)$ for any system, given its tight-binding Hamiltonian $\hat H$ and sites positions $\big\{\mathbf{r_a} |\, a \in \{0,\dots,N-1\}\big\}$. The measurable quantity (\textbf{TODO:} give links to articles about EELS experiments) is the \textit{loss function}\ \  $-\!\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right]$, where $|\mathbf{q}\rangle$'s denote momentum eigenfunctions. Let $\epsilon_n(\omega)$'s be eigevalues of $\hat\varepsilon(\omega)$ with the corresponding eigenfunctions $|\phi_n(\omega)\rangle$'s. We can now express the loss function as\footnote{ %
+    With eqs. \eqref{eq:appl:result_w} and \eqref{eq:appl:computing_chi} implemented, we can obtain $\hat \varepsilon(\omega)$ for any system, given its tight-binding Hamiltonian $\hat H$ and sites positions $\big\{\mathbf{r_a} |\, a \in \{0,\dots,N-1\}\big\}$. 
+   
+\begin{comment}
+    The measurable quantity (\textbf{TODO:} give links to articles about EELS experiments) is the \textit{loss function}\ \  $-\!\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right]$, where $|\mathbf{q}\rangle$'s denote momentum eigenfunctions. Let $\epsilon_n(\omega)$'s be eigevalues of $\hat\varepsilon(\omega)$ with the corresponding eigenfunctions $|\phi_n(\omega)\rangle$'s. We can now express the loss function as\footnote{ %
     Obviously, if $\epsilon_n(\omega)$ is an eigenvalue of $\hat \varepsilon(\omega)$ with an eigenvector $|\phi_n(\omega)\rangle$, then $1\!/\!\epsilon_n(\omega)$ is an eigenvalue of $\hat \varepsilon^{-1}(\omega)$ with the same eigenvector. We thus have
     \begin{multline*}
     -\operatorname{Im}\left[\langle \mathbf{q} | \hat\varepsilon^{-1}(\omega) | \mathbf{q} \rangle\right] = -\operatorname{Im}\left[ \sum_{n,m} \langle \mathbf{q} | \phi_n \rangle \langle \phi_n | \hat \varepsilon^{-1}(\omega) | \phi_m \rangle \langle \phi_m | \mathbf{q} \rangle \right] \\ = -\operatorname{Im}\left[ \sum_{n} |\langle \mathbf{q} | \phi_n(\omega) \rangle|^2 \frac{1}{\epsilon_n(\omega)} \right] = - \sum_{n} |\langle \mathbf{q} | \phi_n(\omega) \rangle|^2\cdot \operatorname{Im}\left[ \frac{1}{\epsilon_n(\omega)} \right]\; .
@@ -231,47 +236,82 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \begin{equation*}
         \langle \mathbf{q} | \phi_n(\omega) \rangle = \sum_{a} \!\int\!\!\text{d}^3 r \; \langle \mathbf{q} | \mathbf{r} \rangle \langle \mathbf{r} | a \rangle \langle a | \phi_n(\omega) \rangle = \sum_{a} \langle \mathbf{q} | \mathbf{r_a} \rangle \langle a | \phi_n(\omega) \rangle = \frac{1}{(2\pi)^{3/2}} \sum_{a} e^{-i\mathbf{q}\cdot\mathbf{r_a}} \langle a | \phi_n(\omega) \rangle \; .
     \end{equation*}
+\end{comment}
 
 \newpage
 \section{Experiments}
-    Let's now apply the aquired tools to examine plasmonic properties of some systems. For this we need a way of visualising the results. We will follow the approach taken in \cite{plasmonic2015}.
-
-    Classically, plasmons are identified by $\varepsilon(\omega) = 0$. In reality, there is also loss due to the parameter $\eta \neq 0$ in eq. \eqref{eq:appl:result_w}. We therefore seek frequencies $\omega$ such that
-    \begin{equation} \label{exp:plasmon_def}
+    Let's now apply the aquired tools to examine plasmonic properties of some systems. For this we need a way of visualising the results. The most common way to measure plasmonic properties is through EELS (\textit{E}lectron \textit{E}nergy \textit{L}oss \textit{S}pectroscopy) experiments. We will not discuss these experiments in detail. A good explanation in-depth explanation may be found in \cite{egerton2009eels}. EELS works great for systems exhibiting translational symmetry. For such systems $\varepsilon(\mathbf{r}, \mathbf{r'}, \omega) = \varepsilon(\mathbf{r} - \mathbf{r'}, \omega)$. This function is then Fourier transformed into $\varepsilon(\mathbf{q}, \omega)$, and \ $-\operatorname{Im}[\varepsilon(\mathbf{q}, \omega)^{-1}]$ is the \textit{loss function}, a measurable quantity. Our focus, however, relies on fractals, i.e. systems that don't have translational symmetry. $\varepsilon(\mathbf{q}, \omega)$ is thus not well defined --- another approach is needed.
+    
+    \cite{plasmonic2015} provides an example. It goes as follows. Consider the classical definition of a plasmon: $\varepsilon(\omega) = 0$. In reality, there is also loss due to the parameter $\eta \neq 0$ in eq. \eqref{eq:appl:result_w}. We then decompose the dielectric function
+    \begin{equation*}
+        \hat\varepsilon(\omega) = \sum_n \epsilon_n(\omega) \, |\phi_n(\omega)\rangle\!\langle \phi_n(\omega)|
+    \end{equation*}
+    and identify plasmons by
+    \begin{equation} \label{eq:exp:plasmon_def}
         \hat\varepsilon(\omega)|\phi_n(\omega)\rangle = \epsilon_n(\omega) |\phi_n(\omega)\rangle\;,\text{ with }\epsilon_n(\omega) \in \mathbb{C}\setminus\mathbb{R}\text{, i.e. purely imaginary.}
     \end{equation}
-    As noted in \cite{andersen2012spatially}, ``when the imaginary part of eigenvalue $\epsilon_n(\omega)$ does not vary too much around the plasmon frequency $\omega'$'', condition \eqref{exp:plasmon_def} is equivalent to the condition that
-    \begin{equation*}
+    As noted in \cite{andersen2012spatially}, ``when the imaginary part of eigenvalue $\epsilon_n(\omega)$ does not vary too much around the plasmon frequency $\omega'$'', condition \eqref{eq:exp:plasmon_def} is equivalent to the condition that
+    \begin{equation} \label{eq:exp:plasmon_qm_condition}
         -\operatorname{Im}[\epsilon_n^{-1}(\omega)] \text{ has a local maximum at }\omega'\;.
-    \end{equation*}
-
-    This implies that $\epsilon_n(\omega)$ should be a continuous in the neighbourhood of $\omega'$. The problem is to choose $n$. In which of all the eigenvalues are we interested in? And does $n$ vary with $\omega$ or remain constant? The approach taken in \cite{plasmonic2015} is to let $n$ be a function of $\omega$ defined as the index of the eigenvalue with the highest \ $-\operatorname{Im}[ \epsilon_j^{-1}(\omega)]$. We then seek the maxima of \ $-\operatorname{Im}[\epsilon_{n(\omega)}^{-1}(\omega)]$ and call them \textit{plasmon frequencies}. Although it is not obvious whether such an approach is mathematically valid, the fact that \ $-\operatorname{Im}[\epsilon_{n(\omega)}^{-1}(\omega)]$ turns out to be continuous in the calculations seems like a good physical justification.
-
-    Finally, for each $(\omega, n)$ pair, $\operatorname{Re}[\langle \mathbf{r} |\phi_{n(\omega)}(\omega) \rangle]$ gives a good insight in how the plasmon modes ``look like''. We now discuss a couple of systems for which we've performed the outlined calculations.
- 
-
+    \end{equation}
+    In \cite{plasmonic2015} the \textit{loss function} is then defined as \ $-\operatorname{Im}[\epsilon_{n(\omega)}^{-1}(\omega)]$, where $n(\omega)$ is the index of the eigenvalue with the highest \ $-\operatorname{Im}[ \epsilon_j^{-1}(\omega)]$. This provides us a ``real space analogue'' of \ $-\operatorname{Im}[\varepsilon^{-1}(\mathbf{q}, \omega)]$. Fig. \ref{fig:spectrum-3rd-SC-far-away} gives an example of how loss spectrum may look like.
     \begin{figure}[h] 
     \center
+    \input{Spectrum-3rd-SC-Far-Away.tex}
+    \caption{Loss function spectrum for the third iteration Sierpinski carpet. The spectrum is highly fluctuating. This makes one wonder whether this spectrum represents actual physical results.}
+    \label{fig:spectrum-3rd-SC-far-away}
+    \end{figure}
+    Huge number of sharp peaks looks like noise at first glance. A closer look shows that this is not the case. All in all, this makes one doubt the validity of the definition of the loss function used in \cite{plasmonic2015}. Furthermore, there are no formal arguments provided that support such a definition.
+    Finally, for each $(\omega, n(\omega))$ pair, $\operatorname{Re}[\langle \mathbf{r} |\phi_{n(\omega)}(\omega) \rangle]$ gives a good insight in how the plasmon modes ``look like''. There are, however, no known experiments where measurements of $\operatorname{Re}[\langle \mathbf{r} |\phi_{n(\omega)}(\omega) \rangle]$ were performed.
+
+    \paragraph{Another approach} is to try to express some measurable quantity using $\varepsilon(\omega)$. An, obviously, measurable quantity would be the electron charge distribution. From eq. \eqref{eq:qm:result_w}, we get\footnote{ %
+        \begin{equation*}
+        \begin{aligned}
+            \langle\mathbf{r} |\hat V_\text{ext}(\omega)| \mathbf{r}\rangle &= \int\!\!\text{d}^3r'\, \langle\mathbf{r} |\hat\varepsilon(\omega)| \mathbf{r'}\rangle\langle\mathbf{r'} |\hat V|\mathbf{r'}\rangle \\
+            \int\!\!\text{d}^3r\,\langle\mathbf{r''}|\hat\varepsilon^{-1}(\omega)|\mathbf{r}\rangle\langle\mathbf{r} |\hat V_\text{ext}(\omega)| \mathbf{r}\rangle &= \int\!\!\text{d}^3r'\!\!\!\int\!\!\text{d}^3r\,\langle\mathbf{r''} |\hat\varepsilon^{-1}(\omega) |\mathbf{r}\rangle\langle\mathbf{r} |\hat\varepsilon(\omega)| \mathbf{r'}\rangle\langle\mathbf{r'} |\hat V| \mathbf{r'}\rangle \\
+            \int\!\!\text{d}^3r\,\langle\mathbf{r''} |\hat\varepsilon^{-1}(\omega)| \mathbf{r}\rangle \langle\mathbf{r} |\hat V_\text{ext}(\omega)| \mathbf{r}\rangle &= \int\!\!\text{d}^3r'\,\langle\mathbf{r''} | \mathbf{r'}\rangle \langle\mathbf{r'} |\hat V| \mathbf{r'}\rangle \\
+            \int\!\!\text{d}^3r\,\langle\mathbf{r''} |\hat\varepsilon^{-1}(\omega)| \mathbf{r}\rangle \langle\mathbf{r} |\hat V_\text{ext}(\omega)| \mathbf{r}\rangle &= \langle\mathbf{r''} |\hat V| \mathbf{r''}\rangle
+        \end{aligned}
+        \end{equation*}
+    }
+    \begin{equation*}
+        \langle\mathbf{r} |\hat V| \mathbf{r}\rangle = \int\!\!\text{d}^3r'\,\langle\mathbf{r} |\hat\varepsilon^{-1}(\omega)| \mathbf{r'}\rangle \langle\mathbf{r'} |\hat V_\text{ext}(\omega)| \mathbf{r'}\rangle\; .
+    \end{equation*}
+    We can now insert this result into eq. \eqref{eq:qm:self_consistency_t} to obtain
+
+    \begin{equation*}
+        \langle\mathbf{r} |\delta\hat N(\omega)| \mathbf{r}\rangle = \int\!\!\text{d}^3r''\, \langle\mathbf{r} |\hat V^{-1}_\text{Coulomb}| \mathbf{r''}\rangle \cdot \left( \int\!\!\text{d}^3r'\, \langle\mathbf{r''} |\hat\varepsilon^{-1}(\omega)| \mathbf{r'}\rangle\langle\mathbf{r'} |\hat V_\text{ext}(\omega)| \mathbf{r'}\rangle - \langle\mathbf{r''} |\hat V_\text{ext}(\omega)| \mathbf{r''}\rangle \!\right) \; .
+    \end{equation*}
+
+
+\subsection{Third iteration Sierpinski carpet}
+    \begin{figure}[h]
     \input{Coordinates-3rd-SC.tex}
     \caption{Third iteration Sierpinski carpet. $x$ and $y$ coordinates are given in terms of lattice constant. Width of the sample is $3^3 = 27$ unit cells. In this case we chose the lattice constant of graphene $a \approx 0.246$ nm, which results in the total width of about six and a half nanometers.}
     \label{fig:coordinates-3rd-SC}
     \end{figure}
-
-\subsection{Third iteration Sierpinski carpet}
     We start by examining a small system --- third iteration Siepinski carpet. The sample is shown in fig. \ref{fig:coordinates-3rd-SC}. Using TIPSI Python package we can construct a tight-binding Hamiltonian for the problem. Hopping value of $2.8$ eV is used. As we need eigenenergies and eigenstates anyway to make use of eq. \eqref{eq:appl:result_w}, we can have a look at the density of states (fig. \ref{fig:dos-3rd-SC}). 
-    \begin{figure}[h] 
+    \begin{wrapfigure}[18]{r}{.5\textwidth}
     \center
     \input{DoS-3rd-SC.tex}
     \caption{Density of states for the 3rd iteration SC. Due to the small size of the system, we can't say much about the distribution of energy eigenvalues. Except that it's highly fluctuating --- as one would expect for a fractal system.}
     \label{fig:dos-3rd-SC}
-    \end{figure}
+    \end{wrapfigure}
     Although the number of points is quite small (512 atomic sites), we can still extract some information. For example, all possible energies lie within the $(-9.5\text{ eV}, 9.5\text{ eV})$ range. Hence, $E_i - E_j < 19$ eV for any $i, j$. $G_{i,j}$ has $(E_i - E_j - \hbar(\omega + i\eta))$ in the denominator, thus for $\omega$'s greater than $\approx20$ eV, \ $-\operatorname{Im}[ \epsilon_{n(\omega)}^{-1}(\omega)]$ will asymptotically approach zero --- no need to search for plasmons there.
 
-    \begin{figure}[h] 
-    \center
-    \input{Spectrum-3rd-SC-Asymptotic.tex}
-    \caption{This plot shows asymptotic behavior of the loss function at high frequencies. ``Numerical'' denotes the results of the precise numerical calculation. ``Fit'' is obtained by fitting $a / ((b - \omega)^2 + c^2)$ (i.e. eq. \eqref{eq:exp:asymptotic_approx}) to the results of numerical calculations. LSA (Least Square Approximation) gives the following values for the parameters: $a = 1.031 \times 10^{-2}$, $b = 19.779$, $c = 8 \times 10^{-4}$.}
-    \label{fig:spectrum-3rd-SC-Asymptotic}
+    \begin{figure}[t] 
+    \begin{minipage}{.5\textwidth}
+        \input{Spectrum-3rd-SC-Asymptotic.tex}
+        \captionsetup{width=0.95\linewidth}
+        \captionof{figure}{This plot shows asymptotic behavior of the loss function at high frequencies. ``Numerical'' denotes the results of the precise numerical calculation. ``Fit'' is obtained by fitting $a / ((b - \omega)^2 + c^2)$ (i.e. eq. \eqref{eq:exp:asymptotic_approx}) to the results of numerical calculations. LSA (Least Square Approximation) gives the following values for the parameters: $a = 1.031 \times 10^{-2}$, $b = 19.779$, $c = 8 \times 10^{-4}$.}
+        \label{fig:spectrum-3rd-SC-Asymptotic}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \input{Spectrum-3rd-SC-Real.tex}
+        \captionsetup{width=0.95\linewidth}
+        \captionof{figure}{Behavior of $\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]$ is shown. A really narrow interval of frequencies is chosen for clarity. Roots where the sign of $\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]$ changes from $-1$ to $+1$ are well defined. We identify them with plasmon frequencies.\\\hfill\\\hfill\\\hfill\\\hfill}
+        \label{fig:spectrum-3rd-SC-real}
+    \end{minipage}
     \end{figure}
     To calculate the dielectric function, we need to choose a couple more parameters of the system. For now, we, again, follow \cite{plasmonic2015} and let the temperature $T$ of the system be $300$ K, chemical potential $\mu = 0.4$ eV, self-interaction coulomb potential $V_0 = 15.78$ eV, and the ``inverse relaxation time'' $\hbar\eta = 0.006$ eV.
     
@@ -295,25 +335,56 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \end{equation}
     Fig. \ref{fig:spectrum-3rd-SC-Asymptotic} shows how good this approximation actually is. This verifies our hypothesis that $\underset{i,j}{\operatorname{max}}|E_i - E_j|$ is a reasonable upper bound for plasmon frequencies.
 
-    \begin{figure}[h] 
-    \center
-    \input{Spectrum-3rd-SC-Far-Away.tex}
-    \caption{Loss function spectrum. The spectrum is highly fluctuating (but not self-similar). This makes one wonder whether this spectrum represents actual physical results. Our definition of the loss function may just be ill-formed. Zoomed-in plot shows that this is not the case.}
-    \label{fig:spectrum-3rd-SC-far-away}
-    \end{figure}
 
-    Spectrum for the full range of frequencies is shown on fig. \ref{fig:spectrum-3rd-SC-far-away}. With our definition of a plasmon high number of sharp peaks means that there are plenty of plasmons. It is interesting to compare the classical definition of plasmon to the condition that loss function has a local maximum. For this we focus on the low-energy part of the spectrum in fig. \ref{fig:spectrum-3rd-SC-far-away} as low-energy plasmon modes are easier to excite experimentally (\textbf{TODO:} this is my intuition, but is it actually true?).
+    Spectrum for the full range of frequencies is shown on fig. \ref{fig:spectrum-3rd-SC-far-away}. With our definition of a plasmon, high number of sharp peaks means that there are plenty of plasmons. It is interesting to compare the classical definition of plasmon to the condition that loss function has a local maximum. For this we focus on the low-energy part of the spectrum in fig. \ref{fig:spectrum-3rd-SC-far-away} as low-energy plasmon modes are easier to excite experimentally (\textbf{TODO:} this is my intuition, but is it actually true?).
 
-
+    
+    Classically, we defined plasmon frequencies as roots of $\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]$. However, if we plot $\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]$ vs. $\omega$ (see fig. \ref{fig:spectrum-3rd-SC-real}), we notice that roots where the sign changes from $+1$ to $-1$ are not well defined. These are just discontinuities. Hence, extend the definition of plasmon frequencies to account for that:
+    \begin{equation*}
+        \operatorname{Re}[\epsilon_{n(\omega')}(\omega')] = 0\;\text{ and } \lim_{\omega \to \omega'+}\operatorname{sign} \!\left(\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]\right) - \lim_{\omega \to \omega'-}\operatorname{sign} \!\left(\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]\right) = 2 \;.
+    \end{equation*}
+    With this improved definition we can now check whether conditions \eqref{eq:exp:plasmon_def} and \eqref{eq:exp:plasmon_qm_condition} are indeed equivalent. For this we plot the loss function spectrum and mark the points where the real part of the dielectric function crosses zero from below. Fig. \ref{fig:spectrum-3rd-SC} shows such a spectrum.
 
     \begin{figure}[h] 
     \center
     \input{Spectrum-3rd-SC.tex}
-    \caption{}
+    \caption{Loss function spectrum with ``classical'' plasmons marked in red. Most plasmons appear near maxima of the loss function --- in accordance with \cite{andersen2012spatially}. At least one plasmon, however, appears at frequency where the derivative of the loss function exhibits a discontinuity. This plasmon is marked with an arrow in the plot. A closer look at the real part of the dielectric function shows that $\operatorname{Re} [\epsilon_{n(\omega)}(\omega)]$ changes its sign in a discontinuous step. We thus consider this point a false positive and not a plasmon.}
     \label{fig:spectrum-3rd-SC}
     \end{figure}
-     
 
+    We see that ``classical'' plasmon frequencies are indeed located near maxima of the loss function. As noted by \cite{andersen2012spatially}, it's not important that the peaks do not coincide with roots of $\operatorname{Re} [\epsilon_{n(\omega)}(\omega)]$ as long as the eigenstates $|\phi_{n(\omega)}(\omega)\rangle$ do not vary much. We can verify this by calculating $|\langle \phi_{n(\omega_i)}(\omega_i) | \phi_{n(\omega_{i+1})}(\omega_{i+1}) \rangle|$, where $\omega_i$'s denote frequencies for which we have calculated $\hat\varepsilon$. It turns out that except for the points where we ``step over'' from one peak to another, $|\langle \phi_{n(\omega_i)}(\omega_i) | \phi_{n(\omega_{i+1})}(\omega_{i+1}) \rangle| \approx 1$ with variations of order $1\%$.
+
+    \begin{figure}[h] 
+    \begin{minipage}{.5\textwidth}
+        \input{Picture-Eigenstate-3rd-SC-0.466250.tex}
+        \captionsetup{width=0.9\linewidth}
+        \captionof{figure}{Plasmon eigenmode at frequency corresponding to $\hbar\omega = 0.46625$ eV}
+        \label{fig:eigenstate-3rd-SC-0.466250}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \input{Picture-Eigenstate-3rd-SC-0.474250.tex}
+        \captionsetup{width=0.9\linewidth}
+        \captionof{figure}{Plasmon eigenmode at frequency corresponding to $\hbar\omega = 0.47425$ eV}
+        \label{fig:eigenstate-3rd-SC-real-0.474250}
+    \end{minipage}
+    \end{figure}
+
+    This means that to know how plasmon eigenstates look like, we do not even need to know the precise location of the maximum of \ $-\operatorname{Im}[\epsilon_{n(\omega)}^{-1}(\omega)]$ or the zero of $\operatorname{Re} [\epsilon_{n(\omega)}(\omega)]$. Knowledge that we are on a particular peak suffices. As an example, fig. \ref{fig:eigenstate-3rd-SC-0.466250} and \ref{fig:eigenstate-3rd-SC-real-0.474250} show $\operatorname{Re} [\langle \mathbf{r} | \phi_{n(\omega)}(\omega) \rangle]$ for two high peaks at around $0.467$ eV and $0.475$ eV (see fig. \ref{fig:spectrum-3rd-SC}).
+    
+    Localised plasmon eigenmodes are easier to control and thus are highly valuable for experimental applications. We use IPR (\textit{I}nverse \textit{P}articipation \textit{R}atio) as a measure of localisation. In our case IPR for an eigenstate $|\phi\rangle$ is defined as
+    \begin{equation} \label{eq:exp:ipr_def}
+        \operatorname{IPR}|\phi\rangle = \sum_a |\langle a | \phi \rangle|^4 \; .
+    \end{equation}
+    The higher the IPR of a state, the more localised it is. For example, a completely localised state $|a\rangle$ has an IPR of $1$, while a spread out state like $\frac{1}{\sqrt{N}}\sum_a |a\rangle$ has an IPR of order $\mathcal{O}(N^{-2})$.
+
+
+
+    \begin{figure}[h] 
+    \center
+    \input{Spectrum-3rd-SC-IPR.tex}
+    \caption{}
+    \label{fig:ipr-3rd-SC}
+    \end{figure}
 
 \begin{comment}
     Consider a lattice with $N$ atomic sites where each atom contributes exactly one electron to the valence band. Let $\mathbb{C}^N$ be the Hilbert space of our problem, where $N$ is the number of atomic sites. Here, we assume that each atom contributes exactly one electron to the valence band. $N$: $\operatorname{dim}\,\mathcal{H} = N$. The system is described by a hermitian hamiltonian $H \in \mathcal{B}\left(\mathcal{H}\right)$ with eigenenergies $E_i \in \mathbb{R}$ and eigenstates $|\psi_i\rangle \in \mathcal{H}$ (here, $i \in {0,\dots,N-1}$). 
