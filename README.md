@@ -14,4 +14,4 @@ __Answer__: I spoke to Mikhail Katsnelson today, he confirmed that `V` is usuall
 __Answer__: There is a rather nice description of this concept in "Causality and Dispertion Relations" book by H.M. Nussenzveig. The method's description should now be correct -- see updated PDF.
 
 3) We do all the calculations in the _atomic basis_, i.e. a basis spanned by local site wave functions.I wonder, is this basis actually complete? What would be a good explanation for it? Is this because we use tight-binding approximation? In the sense that electrons are "tight" to atoms and thus local site functions + linear combinations thereof give us all possible states?
-
+__Answer__: Yes.
