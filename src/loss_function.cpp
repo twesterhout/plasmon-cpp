@@ -15,6 +15,11 @@
 #include <boost/core/demangle.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/combine.hpp>
+
 
 #include <benchmark.hpp>
 #include <logging.hpp>
@@ -35,18 +40,20 @@ auto init_options() -> po::options_description
 		, po::value<std::string>()->required()
 		, "Type of an element of the epsilon matrix. It may be "
 		  "either cfloat or cdouble." )
-		( "epsilon-eigenvalues" 
+		( "epsilon"
 		, po::value<std::string>()->required()
-		, "File to where eigenvalues of epsilon were stored." )
-		( "epsilon-eigenstates"
-		, po::value<std::string>()->required()
-		, "File to where eigenvectors of epsilon were stored." )
+		, "File to where epsilon matrix was saved to." )
 		( "positions"
 		, po::value<std::string>()->required()
-		, "File to where atomic site positions were stored." )
+		, "File to where atomic site positions were saved to." )
 		( "q"
 		, po::value<std::string>()->required()
-		, "q-vector as (qx, qy, qz)." );
+		, "List of |q|s separated by commas. MIND YOU: "
+		  "no spaces!" )
+		( "direction"
+		, po::value<std::string>()->required()
+		, "Direction of q as (x,y,z). It is automatically"
+		  "normalized." );
 	return description;
 }
 
@@ -70,10 +77,16 @@ auto element_type(std::string input) -> std::type_index
 
 
 template <class _R>
-auto read_wavevector(std::string str) -> std::array<_R, 3>
+auto parse_direction(std::string str) -> std::array<_R, 3>
 {
 	using namespace boost;
 	using namespace boost::algorithm;
+
+	auto const normalize = [](_R const x, _R const y, _R const z) 
+		-> std::array<_R, 3> {
+		auto const _abs = _R{1.0} / std::sqrt(std::norm(x) + std::norm(y) + std::norm(z));
+		return {_abs * x, _abs * y, _abs * z};
+	};
 
 	std::regex vector_re{"\\((.*),(.*),(.*)\\)"};
 	std::smatch results;
@@ -81,12 +94,34 @@ auto read_wavevector(std::string str) -> std::array<_R, 3>
 	trim(str);
 	if (std::regex_match(str, results, vector_re)) {
 		assert(results.size() == 4);
-		return { lexical_cast<_R>(trim_copy(results[1].str()))
-		       , lexical_cast<_R>(trim_copy(results[2].str()))
-			   , lexical_cast<_R>(trim_copy(results[3].str())) };
+		return normalize( lexical_cast<_R>(trim_copy(results[1].str()))
+		                , lexical_cast<_R>(trim_copy(results[2].str()))
+			            , lexical_cast<_R>(trim_copy(results[3].str())) );
 	}
 	throw std::invalid_argument{ "Could not convert '" + str 
-	                           + "' to 3D vector."};
+	                           + "' to a 3D vector."};
+}
+
+template <class _R>
+auto parse_qs(std::string const& str) -> std::vector<_R>
+{
+	using namespace boost;
+	using namespace boost::adaptors;
+	using namespace boost::algorithm;
+
+	auto const parse_number = [](auto const& s) {
+		return lexical_cast<_R>(trim_copy(s));
+	};
+
+	std::vector<std::string> tokens;
+	split(tokens, str, [](auto const ch) { return ch == ','; });
+
+
+	std::vector<_R> qs;
+	qs.reserve(tokens.size());
+	copy( tokens | transformed(std::cref(parse_number)) 
+	    , std::back_inserter(qs) );
+	return qs;	
 }
 
 
@@ -153,7 +188,7 @@ template < std::size_t _Dim = 3
          , class _R2 = double
          , class _R3 = std::common_type_t<_R1, _R2>
          >
-auto make_momentum_eigenvector( std::array<_R1, 3> const& wavevector
+auto make_momentum_eigenvector( std::array<_R1, 3> const wavevector
                               , std::vector<std::array<_R2, 3>> const& positions
                               , _R3 const pi = _R3{M_PI} )
 {
@@ -180,70 +215,71 @@ auto make_momentum_eigenvector( std::array<_R1, 3> const& wavevector
 }
 
 
-template <class _Matrix1, class _Matrix2, class _Matrix3>
-auto loss_function( _Matrix1 const& q 
-                  , _Matrix2 const& eigenvalues
-                  , _Matrix3 const& eigenvectors )
+template <class _R, class _Matrix>
+auto loss_function( std::array<_R, 3> const& direction
+                  , std::vector<_R> const& qs
+                  , _Matrix const& epsilon
+                  , std::vector<std::array<_R, 3>> const& positions )
 {
-	assert(tcm::is_column(eigenvalues));
-	assert(tcm::is_square(eigenvectors));
-	assert(eigenvalues.height() == eigenvectors.height());
-	using _C = std::common_type_t< typename _Matrix1::value_type
-	                             , typename _Matrix2::value_type
-	                             , typename _Matrix3::value_type >;
-	using _R = typename _C::value_type;
+	using namespace boost;
+	using namespace boost::adaptors;
 
-	auto const n = eigenvalues.height();
+	assert(tcm::is_square(epsilon));
+	assert(epsilon.height() == positions.size());
+	using _C = typename _Matrix::value_type;
+	static_assert( std::is_same<typename _C::value_type, _R>::value
+	             , "Types mismatch." );
 
-	std::vector<_R> coeff;
-	coeff.reserve(n);
-	for (std::size_t i = 0; i < n; ++i) {
-		coeff.push_back( std::norm( tcm::import::dot(
-			n, q.data(), 1, eigenvectors.data(0, i), 1) ) );
-	}
+	auto const make_wavevector = [&direction](auto const q) noexcept
+		-> std::array<_R, 3> {
+		return {q * direction[0], q * direction[1], q * direction[2]};
+	};
 
-	auto const epsilon = std::inner_product
-		( std::begin(coeff), std::end(coeff)
-		, eigenvalues.cbegin_column(0)
-		, _C{0}
-		, std::plus<>{}
-		, [](auto const c, auto const x) { return c * x; } );
+	auto const make_epsilon_q = [&epsilon,&positions](auto const& wavevector) {
+		auto const q_state = make_momentum_eigenvector(wavevector, positions);
+		tcm::Matrix<_C> _temp{epsilon.height(), 1};
+		tcm::blas::gemv( tcm::blas::Operator::H
+		               , _C{1}, epsilon, q_state 
+		               , _C{0}, _temp );
+		return tcm::blas::dot(_temp, q_state);
+	};
 
-	constexpr auto _one_ = typename _Matrix2::value_type::value_type{1};
-	auto const inverse_epsilon = std::inner_product
-		( std::begin(coeff), std::end(coeff)
-		, eigenvalues.cbegin_column(0)
-		, _C{0}
-		, std::plus<>{}
-		, [_one_](auto const c, auto const x) { return c * _one_ / x; } );
-
-	return std::make_pair(epsilon, inverse_epsilon);
+	std::vector<_C> epsilon_q;
+	epsilon_q.reserve(qs.size());
+	copy( qs | transformed(std::cref(make_wavevector))
+	         | transformed(std::cref(make_epsilon_q))
+	    , std::back_inserter(epsilon_q) );
+	return epsilon_q;
 }
 
 
 template <class _C>
 auto run(boost::program_options::variables_map const& vm) -> void
 {
+	using namespace boost;
 	using _R = typename _C::value_type;
-	tcm::setup_console_logging();
-	boost::log::sources::severity_logger<tcm::severity_level> lg;
 
-	auto const wavevector = read_wavevector<_R>(vm["q"].as<std::string>());
+	auto const direction = 
+		parse_direction<_R>(vm["direction"].as<std::string>());
+	auto const qs =
+		parse_qs<_R>(vm["q"].as<std::string>());
 	auto const positions = 
 		read_positions<_R>(vm["positions"].as<std::string>());
-	auto const eigenvalues = 
-		load_matrix<_C>(vm["epsilon-eigenvalues"].as<std::string>());
-	auto const eigenstates = 
-		load_matrix<_C>(vm["epsilon-eigenstates"].as<std::string>());
-	auto const q = make_momentum_eigenvector(wavevector, positions);
+	auto const epsilon = 
+		load_matrix<_C>(vm["epsilon"].as<std::string>());
 
-	_C epsilon, inv_epsilon;
-	std::tie(epsilon, inv_epsilon) = 
-		loss_function(q, eigenvalues, eigenstates);
-	std::cout << std::setprecision(20) 
-	          << std::real(epsilon)     << '\t' << std::imag(epsilon) << '\t'
-			  << std::real(inv_epsilon) << '\t' << std::imag(inv_epsilon)
-			  << '\n';
+	auto const epsilon_q = loss_function( direction, qs
+	                                    , epsilon
+	                                    , positions );
+
+	auto const print = [](auto const& t) {
+		std::cout << tuples::get<0>(t) << '\t' 
+		          << std::real(tuples::get<1>(t)) << '\t' 
+		          << std::imag(tuples::get<1>(t)) << '\n';
+	};
+
+	std::cout << std::scientific << std::setprecision(15);
+	for_each(combine(qs, epsilon_q), std::cref(print));
 }
 
 

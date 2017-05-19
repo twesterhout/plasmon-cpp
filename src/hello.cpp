@@ -332,6 +332,8 @@ auto run( mpi::communicator & world
 	boost::log::sources::severity_logger<tcm::severity_level> lg;
 
 	auto const homework = get_job<R>(world, input.frequency_range, lg);
+	if (homework.empty()) 
+		return;
 	for(auto const& w : homework) {
 		calculate_single( C{w, input.constants.at("tau")}
 		                , input.E
