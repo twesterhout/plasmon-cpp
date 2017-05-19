@@ -25,32 +25,54 @@
 
 namespace tcm {
 
+template <class T> struct huge_val;
+
+template <> 
+struct huge_val<float> { static constexpr float value = HUGE_VALF; };
+
+template <> 
+struct huge_val<double> { static constexpr double value = HUGE_VAL; };
+
+template <> 
+struct huge_val<long double> { static constexpr long double value = HUGE_VALL; };
+
+constexpr float huge_val<float>::value;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Computes \f$ f(E) \f$
 
 /// Calculates the Fermi-Dirac distribution:
 /// \f[ f(E) := \frac{1}{\exp(\frac{E - \mu}{k_{\text{B}}T}) + 1}. \f]
-/// All parameters are templated to allow the use of floating point numbers 
-/// with different precision. The result, however, is (implicitely) converted 
-/// to \p _F, i.e. the type of \p E.
-/// \tparam    _F      Represents a real/compex field.
-/// \tparam    _R      Represents a real field.
-/// \param     mu      \f$ \mu \f$ is the <em>chemical potential</em>
-/// \param     t       \f$ T \f$ is the <em>temperature</em> 
-/// \param     kb      \f$ k_\text{B} \f$ is the <em>Boltzmann constant</em>.
+///
+/// In the calculation we use that p
+/// \f[ \begin{aligned}
+///         \lim_{E\to -\infty} f(E) &= 1 //
+///         \lim_{E\to +\infty} f(E) &= 0
+///     \end{algned}
+/// \f]
+/// If `std::exp` returns HUGE_VAL, HUGE_VALF or HUGE_VALL, 0 is returned.
+/// \param     E       Energy, i.e. a real number. Thus `_F` must be floating
+///                    point: `std::is_floating_point<_F>::value == true`.
+/// \param     mu      Chemical potential \f$ \mu \f$. It has the dimensions
+///                    of energy \f$\implies\f$ `_R` is also floating point.
+/// \param     t       Temperature \f$ T \f$.
+/// \param     kb      Boltzmann constant \f$ k_\text{B} \f$.
 ///
 /// \return \f$ f(E) \f$.
-/// \except Should not throw.
 ///////////////////////////////////////////////////////////////////////////////
 template<class _F, class _R>
-auto fermi_dirac( _F const E
-                , _R const t, _R const mu, _R const kb ) noexcept -> _F
+auto fermi_dirac(_F const E, _R const t, _R const mu, _R const kb ) noexcept
 {
-	auto const arg = (E - mu) / (kb * t);
-	if(arg >   700.0) return 0.0;
-	if(arg < - 700.0) return 1.0;
-	return 1.0 / (std::exp(arg) + 1.0); 
+	static_assert(std::is_floating_point<_F>::value, "Energy must be real.");
+	static_assert(std::is_floating_point<_R>::value, "Chemical potential, " 
+		"temperature and Boltzmann's constant must be real.");
+
+	auto const x = std::exp((E - mu) / (kb * t));
+
+	if (std::isinf(x)) return 0.0;
+	if (x < std::numeric_limits<decltype(x)>::epsilon()) return 1.0;
+	return 1.0 / (x + 1.0); 
 }
 
 
@@ -67,13 +89,13 @@ namespace g_function {
 /// \tparam    _Number Just some abstract field.
 /// \param     i       Row of the matrix \f$G(\omega)\f$.
 /// \param     j       Column of the matrix \f$G(\omega)\f$.
-/// \param     E       Pointer into the array of energies. `E[k]` must be
-///                    equal to \f$ E_k \f$ for all `k`s.
-/// \param     f       Pointer into the array of occupational numbers. `f[k]`
-///                    must be equal to \f$ f(E_k) \f$ for all `k`s.
+/// \param     E       Pointer into the array of energies. `_F` must be real,
+///                    and size of \p E must be at least `max(i,j)`.
+/// \param     f       Pointer into the array of occupational numbers. `_R`
+///                    must be real, and size of \p f must be at least
+///                    `max(i,j)`.
 ///
-/// \return Element of the matrix \f$G(\omega)\f$ at row \p i and column \p j,
-/// i.e. \f$G_{i,j}(\omega)\f$.
+/// \return \f$G_{i,j}(\omega)\f$.
 ///////////////////////////////////////////////////////////////////////////////
 template<class _F, class _R, class _Number>
 auto at( std::size_t const i, std::size_t const j
@@ -81,6 +103,9 @@ auto at( std::size_t const i, std::size_t const j
        , _F const* E
        , _R const* f ) noexcept
 {
+	static_assert(std::is_floating_point<_F>::value, "Energy must be real.");
+	static_assert(std::is_floating_point<_R>::value, "Occupational numbers " 
+		"must be real.");
 	return (f[i] - f[j]) / (E[i] - E[j] - omega);
 }
 
@@ -90,56 +115,60 @@ auto at( std::size_t const i, std::size_t const j
 
 /// \f[ G_{i,j}(\omega) = \frac{f_i - f_j}{E_i - E_j - \omega}. \f]
 ///
-/// \tparam T       Element type of the output matrix. This allow for the
-/// construction of complex matrices even if the result of calling at() is
-/// real.
-/// \tparam _Number Some abstract field.
-/// \tparam _F      A real/complex field.
-/// \tparam _R      A real field.
-/// \tparam _Logger Type of the logger. Usually something like 
-///                 `boost::log::sources::logger`.
 /// \param omega    Frequency \f$\omega\f$ at which to calculate \f$ G \f$.
+///                 It may be either real or complex.
 /// \param E        Energies of the system: \f$1 \times N\f$ matrix (i.e. a 
-///                 column vector
+///                 column vector). `_F` must be floating point.
 /// \param cs       Constants map. This function requires the availability of
 ///                 \f$ T, \mu, k_\text{B}, \hbar \f$ to run. Checks are
 ///                 performed at runtime, i.e. this function <b>may throw</b>!
+///                 `_R`, the type of constants in \p cs must also be floating
+///                 point.
 /// \param lg       The logger.
-/// \return         \f$N \times N\f$ Matrix<T> \f$G(\omega)\f$.
+/// \return         \f$G(\omega)\f$.
 /// \exception      May throw.
 ///////////////////////////////////////////////////////////////////////////////
-template<class T, class _Number, class _F, class _R, class _Logger>
+template<class _Number, class _F, class _R, class _Logger>
 auto make( _Number const omega
          , Matrix<_F> const& E
          , std::map<std::string, _R> const& cs 
-         , _Logger & lg ) -> Matrix<T>
+         , _Logger & lg )
 {
-	TCM_MEASURE( "g_function::make<" + boost::core::demangle(typeid(T).name()) 
-	           + ">()" );
-	LOG(lg, debug) << "Calculating G for omega = " << omega << "...";
+	static_assert(std::is_floating_point<_F>::value, "Energy must be real.");
+	static_assert(std::is_floating_point<_R>::value, "Physical constants " 
+		"such as chemical potential and temperature must be real.");
+	using Real = decltype( fermi_dirac( std::declval<_F>()
+	                                  , std::declval<_R>() 
+	                                  , std::declval<_R>()
+	                                  , std::declval<_R>() ));
+	using Complex = decltype( at( std::declval<std::size_t>()
+	                            , std::declval<std::size_t>()
+	                            , std::declval<_Number>()
+	                            , std::declval<_F const*>() 
+	                            , std::declval<_R const*>() ));
 
+	TCM_MEASURE( "g_function::make<" + boost::core::demangle(
+		typeid(Complex).name()) + ">()" );
+	LOG(lg, debug) << "Calculating G for omega = " << omega << "...";
 	require(__PRETTY_FUNCTION__, cs, "temperature");
 	require(__PRETTY_FUNCTION__, cs, "chemical-potential");
 	require(__PRETTY_FUNCTION__, cs, "boltzmann-constant");
 	assert( is_column(E) == 1 );
-
 	const auto t  = cs.at("temperature");
 	const auto mu = cs.at("chemical-potential");
 	const auto kb = cs.at("boltzmann-constant");
 	const auto N  = E.height();
 
-	Matrix<_F> f{N, 1};
-	std::transform( E.data(), E.data() + N
-	              , f.data()
+	Matrix<Real> f{N, 1};
+	std::transform( E.data(), E.data() + N, f.data()
 	              , [t, mu, kb](auto Ei) noexcept
-	                { return fermi_dirac(Ei, t, mu, kb); } 
-                  );
-	
-	auto G = build_matrix
-		( N, N
-		, [omega, &E, &f](auto i, auto j)
-		  { return T{ at(i, j, omega, E.data(), f.data()) }; }
-		);
+	                { return fermi_dirac(Ei, t, mu, kb); } );
+	Matrix<Complex> G{N, N};
+	for (std::size_t j = 0; j < N; ++j) {
+		for (std::size_t i = 0; i < N; ++i) {
+			G(i,j) = at(i, j, omega, E.data(), f.data());
+		}
+	}
 
 	LOG(lg, debug) << "Successfully calculated G.";
 	return G;
@@ -157,7 +186,6 @@ auto make( _Number const omega
 ///////////////////////////////////////////////////////////////////////////////
 namespace chi_function {
 
-namespace {
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Calculates \f$ \chi_{a,b}(\omega) \f$.
 
@@ -175,9 +203,6 @@ namespace {
 /// `?DOTC`. Intel MKL has a highly parallel implementation of both of this
 /// functions.
 ///
-/// \tparam _C  Complex field. Should be either `std::complex<float>` or
-///             `std::comlex<double>`. Just `float` or `double` should work,
-///             too. Other types are not supported by LAPACK.
 /// \param a    Row of the matrix.
 /// \param b    Column of the matrix.
 /// \param Psi  Eigenstates of the system.
@@ -186,33 +211,122 @@ namespace {
 /// \returns    \f$ \chi_{a,b}(\omega) \f$.
 /// \exception  May throw if memory allocations or LAPACK operations fail.
 ///////////////////////////////////////////////////////////////////////////////
-template<class _C>
+template <class _F, class _C>
 auto at( std::size_t const a, std::size_t const b
-       , Matrix<_C> const& Psi
-       , Matrix<_C> const& G ) -> _C
+       , Matrix<_F> const& Psi, Matrix<_C> const& G )
 {
 	TCM_MEASURE( "chi_function::at<" + boost::core::demangle(
+		typeid(_F).name()) + ", " + boost::core::demangle(
 		typeid(_C).name()) + ">()" );
+	using Complex = std::common_type_t<_F, _C>;
 
 	const auto N = Psi.height();
-	Matrix<_C>    A{N, 1};
-	Matrix<_C> temp{N, 1};
+	Matrix<Complex>    A{N, 1};
+	Matrix<Complex> temp{N, 1};
 
-	// A := (Psi_a o Psi_b*)
 	std::transform( Psi.cbegin_row(a), Psi.cend_row(a)
 	              , Psi.cbegin_row(b)
 	              , A.data()
-	              , [](auto x, auto y) { return x * std::conj(y); }
-	              );
-	// temp := G . A
+	              , [](auto x, auto y) { return x * std::conj(y); } );
 	blas::gemv( blas::Operator::T
-	          , _C{1.0}, G, A
-	          , _C{0.0}, temp
-	          );
-	// 2 A* . temp = 2 A* . G . A
-	return _C{2.0} * blas::dot(A, temp);
+	          , Complex{1}, G, A
+	          , Complex{0}, temp );
+	return Complex{2} * blas::dot(A, temp);
 }
-} // unnamed namespace
+
+namespace {
+// For the case that eigenstates are actually real.
+template<class _Number, class _F, class _R, class _Logger>
+auto make_impl( _Number const omega
+              , Matrix<_F> const& E
+              , Matrix<_F> const& Psi
+              , std::map<std::string, _R> const& cs
+              , _Logger & lg )
+{
+	static_assert(std::is_floating_point<_F>::value, "Energy must be real.");
+	static_assert(std::is_floating_point<_R>::value, "Physical constants " 
+		"such as chemical potential and temperature must be real.");
+	TCM_MEASURE( "chi_function::make_impl<" + boost::core::demangle(
+		typeid(_F).name()) + ">()" );
+	auto const N = E.height();
+	auto const G = g_function::make(omega, E, cs, lg);
+
+	using T = decltype( at( std::declval<std::size_t>()
+	                      , std::declval<std::size_t>()
+	                      , std::declval<Matrix<_F>>()
+	                      , std::declval<decltype(G)>() ));
+	Matrix<T> Chi{N, N};
+
+	auto const _total_points_ = static_cast<double>(N * (N - 1) / 2);
+	auto _start_ = std::chrono::system_clock::now();
+	// fill the diagonal
+	for (std::size_t i = 0; i < N; ++i) {
+			if ((_start_ - std::chrono::system_clock::now()) >
+				std::chrono::minutes{5}) {
+				
+				LOG(lg, info) << "at " << std::round((i + 1) / _total_points_)
+				              << "% ..." << std::flush;
+				_start_ = std::chrono::system_clock::now();
+			}
+			Chi(i, i) = at(i, i, Psi, G);
+	}
+	// calculate upper triangle
+	for (std::size_t j = 0; j < N; ++j) {
+		for (std::size_t i = 0; i < j; ++i) {
+			if ((_start_ - std::chrono::system_clock::now()) >
+				std::chrono::minutes{5}) {
+				
+				LOG(lg, info) << "at " << std::round((N + (i + 1)* (j + 1)) 
+					/ _total_points_)
+				              << "% ..." << std::flush;
+				_start_ = std::chrono::system_clock::now();
+			}
+			Chi(i, j) = at(i, j, Psi, G);
+			Chi(j, i) = Chi(i, j);
+		}
+	}
+	return Chi;
+}
+
+// For the case that eigenstates are complex.
+template<class _Number, class _F, class _R, class _Logger>
+auto make_impl( _Number const omega
+              , Matrix<_F> const& E
+              , Matrix<std::complex<_F>> const& Psi
+              , std::map<std::string, _R> const& cs
+              , _Logger & lg )
+{
+	static_assert(std::is_floating_point<_F>::value, "Energy must be real.");
+	static_assert(std::is_floating_point<_R>::value, "Physical constants " 
+		"such as chemical potential and temperature must be real.");
+	TCM_MEASURE( "chi_function::make_impl<" + boost::core::demangle(
+		typeid(std::complex<_F>).name()) + ">()" );
+	auto const N = E.height();
+	auto const G = g_function::make(omega, E, cs, lg);
+
+	using T = decltype( at( std::declval<std::size_t>()
+	                      , std::declval<std::size_t>()
+	                      , std::declval<Matrix<std::complex<_F>>>()
+	                      , std::declval<decltype(G)>() ));
+	Matrix<T> Chi{N, N};
+
+	auto const _total_points_ = static_cast<double>(N * N);
+	auto _start_ = std::chrono::system_clock::now();
+	for (std::size_t j = 0; j < N; ++j) {
+		for (std::size_t i = 0; i < N; ++i) {
+			if ((_start_ - std::chrono::system_clock::now()) >
+				std::chrono::minutes{5}) {
+				
+				LOG(lg, info) << "at " << std::round(((i + 1) * (j + 1)) / _total_points_)
+				              << "% ..." << std::flush;
+				_start_ = std::chrono::system_clock::now();
+			}
+			Chi(i, j) = at(i, j, Psi, G);
+		}
+	}
+	return Chi;
+}
+} // end unnamed namespace
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -240,7 +354,7 @@ auto make( _Number const omega
          , Matrix<_F> const& E
          , Matrix<_C> const& Psi
          , std::map<std::string, _R> const& cs
-         , _Logger & lg ) -> Matrix<_C>
+         , _Logger & lg )
 {
 	TCM_MEASURE( "chi_function::make<" + boost::core::demangle(
 		typeid(_C).name()) + ">()" );
@@ -251,12 +365,7 @@ auto make( _Number const omega
 	assert( is_square(Psi) );
 	assert( N == Psi.height() );
 
-	auto const G = g_function::make<_C>(omega, E, cs, lg);
-	auto const Chi = build_matrix
-		( N, N
-		, [&Psi, &G] (auto a, auto b) { return at(a, b, Psi, G); }
-	    );
-	
+	auto const Chi = make_impl(omega, E, Psi, cs, lg);
 	LOG(lg, debug) << "Successfully calculating chi.";
 	return Chi;
 }
@@ -394,11 +503,11 @@ namespace dielectric_function {
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Calculates the dielectric function matrix \f$\epsilon(\omega)\f$.
 ///////////////////////////////////////////////////////////////////////////////
-template< class _Number, class _F, class _C, class _R, class _Logger>
+template< class _Number, class _F, class _C, class _R, class _T, class _Logger>
 auto make( _Number const omega
          , Matrix<_F> const& E
          , Matrix<_C> const& Psi
-         , Matrix<_C> const& V
+         , Matrix<_T> const& V
          , std::map<std::string, _R> const& cs 
          , _Logger & lg )
 {
@@ -415,14 +524,17 @@ auto make( _Number const omega
 
 	auto const Chi = chi_function::make(omega, E, Psi, cs, lg);
 
-	Matrix<_C> epsilon{N, N};
-	for (std::size_t j = 0; j < N; ++j)
-		for (std::size_t i = 0; i < N; ++i)
+	static_assert(std::is_same<_T, typename decltype(Chi)::value_type>::value, "");
+	Matrix<_T> epsilon{N, N};
+	for (std::size_t j = 0; j < N; ++j) {
+		for (std::size_t i = 0; i < N; ++i) {
 			epsilon(i, j) = (i == j) ? 1.0 : 0.0;
+		}
+	}
 
 	blas::gemm( blas::Operator::None, blas::Operator::None
-	          , _C{-1.0}, V, Chi
-	          , _C{ 1.0}, epsilon );
+	          , _T{-1.0}, V, Chi
+	          , _T{ 1.0}, epsilon );
 
 	LOG(lg, debug) << "Successfully calculating epsilon.";
 	return epsilon;
