@@ -320,24 +320,83 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
 
     Having discussed the relation of $\hat\varepsilon(\omega)$ to experiments, we go on and calculate some of these measurable quantities for different systems.
 
+\newpage
+\subsection{Graphene nanotriangles}
+    \begin{wrapfigure}[18]{r}{.52\textwidth}
+        \center
+        \vspace{-1.5cm}
+        \input{Coordinates-ZigZag-40}
+        \captionsetup{width=0.5\textwidth}
+        \caption{Graphene nanotriangle with zigzag edges. It has a width of $40\cdot a \approx 10$ nm.}
+        \label{fig:coordinates-ZigZag-40}
+    \end{wrapfigure}
+    We start with a toy system --- a small graphene nanotriangle. Picture \ref{fig:coordinates-ZigZag-40} shows the system. Although it is approximately two times smaller than the triangles used in \cite{plasmonic2015}, it is big enough for testing purposes. Our implementation of eq. \eqref{eq:appl:result_w} significantly differs from the one used in \cite{plasmonic2015}. It thus seems like a good check to see whether out implementation produces the same results. 
+
+    Using \texttt{TIPSI} \texttt{Python} package we can construct the tight-binding Hamiltonian for the problem. Hopping value of $2.8$ eV is used. All other parameters like the chemical potential $\mu = 0.4$ eV, temperature $T = 300$ K, and ``inverse relaxation time'' $\eta = 6$ meV$\!/\hbar$ are also taken to be the same as in \cite{plasmonic2015}.
+
+    \begin{figure}[h]
+    \begin{minipage}{\textwidth}
+        \input{Spectrum-ZigZag-40.tex}
+        \captionof{figure}{Low-energy loss spectrum for a zigzag-edged graphene nanotriangle.}
+        \label{fig:spectrum-ZigZag-40}
+    \end{minipage}
+    \begin{minipage}{\textwidth}
+        \vspace{-1.0cm}
+        \input{Eigenstates-ZigZag-40.tex}
+        \captionof{figure}{Some of the plasmon eigenmodes. These eigenmodes were also found by \cite{plasmonic2015}.}
+        \label{fig:eigenmodes-ZigZag-40}
+    \end{minipage}
+    \end{figure}
+
+    We calculated dielectric function for frequencies corresponding to $\hbar\omega \in [0.1,0.8]$ eV. Resulting loss spectrum, i.e. \ $-\operatorname{Im}[\hat\varepsilon^{-1}_{n(\omega)}(\omega)]$ vs. $\omega$ plot is shown on fig. \ref{fig:spectrum-ZigZag-40}. We also show a couple of eigenmodes on fig. \ref{fig:eigenmodes-ZigZag-40}.
+
+    We won't discuss the results much further because it has been done extensively in \cite{plasmonic2015}, but an important conclusion is that our code works!
+
+
 \subsection{Third iteration Sierpinski carpet}
     \begin{figure}[h]
+    \vspace{-0.5cm}
     \input{Coordinates-3rd-SC.tex}
     \caption{Third iteration Sierpinski carpet. $x$ and $y$ coordinates are given in terms of lattice constant. Width of the sample is $3^3 = 27$ unit cells. In this case we chose the lattice constant of graphene $a \approx 0.246$ nm, which results in the total width of about six and a half nanometers.}
     \label{fig:coordinates-3rd-SC}
     \end{figure}
-    We start by examining a small system --- third iteration Siepinski carpet. The sample is shown in fig. \ref{fig:coordinates-3rd-SC}. Using \texttt{TIPSI} \texttt{Python} package we can construct a tight-binding Hamiltonian for the problem. Hopping value of $2.8$ eV is used. As we need eigenenergies and eigenstates anyway to make use of eq. \eqref{eq:appl:result_w}, we can have a look at the density of states (fig. \ref{fig:dos-3rd-SC}). 
-    \begin{wrapfigure}[17]{r}{.5\textwidth}
+    Next, we turn to somewhat smaller system --- third iteration Siepinski carpet. The sample is shown in fig. \ref{fig:coordinates-3rd-SC}. The Hamiltonian was, again, constructed using \texttt{TIPSI}, and we kept all the configuration parameters such as temperature and chemical potential the same. As we need eigenenergies and eigenstates anyway to make use of eq. \eqref{eq:appl:result_w}, we can have a look at the density of states (fig. \ref{fig:dos-3rd-SC}). Although the number of points is quite small (512 atomic
+    \begin{wrapfigure}[15]{r}{.5\textwidth}
     \center
+    \vspace{-0.9cm}
     \input{DoS-3rd-SC.tex}
     \caption{Density of states for the 3rd iteration SC. Due to the small size of the system, we can't say much about the distribution of energy eigenvalues (it has not yet converged).}
     \label{fig:dos-3rd-SC}
     \end{wrapfigure}
-    Although the number of points is quite small (512 atomic sites), we can still extract some information. For example, all possible energies lie within the $(-9.5\text{ eV}, 9.5\text{ eV})$ range. Hence, $E_i - E_j < 19$ eV for any $i, j$. $G_{i,j}$ has $(E_i - E_j - \hbar(\omega + i\eta))$ in the denominator, thus for $\omega$'s greater than $\approx20$ eV the loss function will asymptotically approach zero --- no need to search for plasmons there.
+    sites), we can still extract some information. For example, all possible energies lie within the $(-9.5\text{ eV}, 9.5\text{ eV})$ range. Hence, $E_i - E_j < 19$ eV for any $i, j$. $G_{i,j}$ has $(E_i - E_j - \hbar(\omega + i\eta))$ in the denominator, thus for $\omega$'s greater than $\approx20$ eV the loss function will asymptotically approach zero --- no need to search for plasmons there.
 
     To calculate the dielectric function, we need to choose a couple more parameters of the system. We chose the temperature of the system $T$ be $300$ K (i.e. room temperature). Chemical potential is taken to be $\mu = 0.4$ eV, self-interaction coulomb potential --- $V_0 = 15.78$ eV, and the ``inverse relaxation time'' --- $\hbar\eta = 0.006$ eV. These values are taken from \cite{plasmonic2015}.
-    
     Having chosen all configuration parameters we calculate $\hat \varepsilon(\omega)$ for frequencies up to $\approx\! 22$ eV. All computations are performed on the \texttt{Cartesius} supercomputer in Amsterdam. For this, a highly parallel implementation of eq. \eqref{eq:appl:result_w} had been written. It is discussed in \ref{programming}.
+
+    \begin{figure}[h]
+    \begin{minipage}{.5\textwidth}
+        \vspace{-0.5cm}
+        \input{Spectrum-3rd-SC-Asymptotic.tex}
+        \captionsetup{width=0.95\linewidth}
+        \captionof{figure}{This plot shows asymptotic behavior of the loss function at high frequencies. Loss function (in arbitrary units) is plotted against electron energy loss (in $t$, hopping value). ``Numerical'' curve is the result of the precise numerical calculation. ``Fit'' is obtained by fitting $a / ((b - \omega)^2 + c^2)$ (i.e. eq. \eqref{eq:exp:asymptotic_approx}) to the results of numerical calculations.} 
+        \label{fig:spectrum-3rd-SC-Asymptotic}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \vspace{-0.5cm}
+        \input{Spectrum-3rd-SC-Real.tex}
+        \captionsetup{width=0.95\linewidth}
+        \captionof{figure}{Behavior of $\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]$ is shown. A really narrow interval of frequencies is chosen for clarity. \\\hfill\\\hfill \\\hfill \\\hfill \\\hfill}
+        \label{fig:spectrum-3rd-SC-real}
+    \end{minipage}
+    \begin{minipage}{\textwidth}
+        % \begin{figure}[h] 
+        % \center
+        \input{Spectrum-3rd-SC-Far-Away.tex}
+        \captionof{figure}{Loss function spectrum for the third iteration Sierpinski carpet.}
+        \label{fig:spectrum-3rd-SC-far-away}
+        % \end{figure}
+    \end{minipage}
+    \end{figure}
 
     First of all, let's discuss the asymptotic behavior of the loss function at high frequencies. Let's ignore for a minute the fact that $\hat\epsilon(\omega)$ is a matrix. Using eq. \eqref{eq:appl:result_w} we can approximate it by 
     \begin{equation*}
@@ -357,28 +416,6 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \begin{equation} \label{eq:exp:asymptotic_approx}
         -\operatorname{Im}\left[\frac{1}{\epsilon(\omega)}\right] \approx \frac{a}{(b - \omega)^2 + c^2} \;,\text{ where }a=AC ,\;\; b = B-A ,\;\; c = C\;.
     \end{equation}
-    \begin{figure}[h] 
-    \begin{minipage}{.5\textwidth}
-        \input{Spectrum-3rd-SC-Asymptotic.tex}
-        \captionsetup{width=0.95\linewidth}
-        \captionof{figure}{This plot shows asymptotic behavior of the loss function at high frequencies. Loss function (in arbitrary units) is plotted against electron energy loss (in $t$, hopping value). ``Numerical'' curve is the result of the precise numerical calculation. ``Fit'' is obtained by fitting $a / ((b - \omega)^2 + c^2)$ (i.e. eq. \eqref{eq:exp:asymptotic_approx}) to the results of numerical calculations.} 
-        \label{fig:spectrum-3rd-SC-Asymptotic}
-    \end{minipage}%
-    \begin{minipage}{.5\textwidth}
-        \input{Spectrum-3rd-SC-Real.tex}
-        \captionsetup{width=0.95\linewidth}
-        \captionof{figure}{Behavior of $\operatorname{Re}[\epsilon_{n(\omega)}(\omega)]$ is shown. A really narrow interval of frequencies is chosen for clarity. \\\hfill\\\hfill \\\hfill \\\hfill \\\hfill}
-        \label{fig:spectrum-3rd-SC-real}
-    \end{minipage}
-    \begin{minipage}{\textwidth}
-        % \begin{figure}[h] 
-        % \center
-        \input{Spectrum-3rd-SC-Far-Away.tex}
-        \captionof{figure}{Loss function spectrum for the third iteration Sierpinski carpet.}
-        \label{fig:spectrum-3rd-SC-far-away}
-        % \end{figure}
-    \end{minipage}
-    \end{figure}
     Fig. \ref{fig:spectrum-3rd-SC-Asymptotic} shows how good this approximation actually is. This model describes the loss function very well for energies higher than $\underset{i,j}{\operatorname{max}}|E_i - E_j|$.
 
 
@@ -463,6 +500,9 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
 
     By calculating $\varepsilon(\omega)$ for a set of frequencies, we obtain the plasmon spectrum, i.e. the loss function as a function of frequency.
 \end{comment}
+
+
+
 
 \newpage
 \bibliography{bibliography}
