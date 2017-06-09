@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -e
+set -e
 set -u
 # set -v
 set -o pipefail
@@ -18,8 +18,13 @@ POTENTIAL=
 SAMPLE_TYPE=
 SPECTRUM=
 PLASMONS=
-IPR_CORR=
+IPR=
+CORRELATION=
 COMMANDS=
+DIRECTION=
+Q_MIN=
+Q_MAX=
+Q_STEP=
 
 
 for i in "$@"; do
@@ -52,7 +57,10 @@ for i in "$@"; do
             PLASMONS="${i#*=}"
         ;;
         --ipr=*)
-            IPR_CORR="${i#*=}"
+            IPR="${i#*=}"
+        ;;
+        --correlation=*)
+            CORRELATION="${i#*=}"
         ;;
         --coordinates=*)
             COORDINATES="${i#*=}"
@@ -69,6 +77,18 @@ for i in "$@"; do
         --potential=*)
             POTENTIAL="${i#*=}"
         ;;
+        --direction=*)
+            DIRECTION="${i#*=}"
+        ;;
+        --q-min=*)
+            Q_MIN="${i#*=}"
+        ;;
+        --q-max=*)
+            Q_MAX="${i#*=}"
+        ;;
+        --q-step=*)
+            Q_STEP="${i#*=}"
+        ;;
         --commands=*)
             COMMANDS="${i#*=}"
         ;;
@@ -79,16 +99,13 @@ for i in "$@"; do
     esac
 done
 
-[[ "${START_WIDTH}x" = "x" ]]      && { echo "Need the '--start-width' argument!" 1>&2; exit -1; }
-[[ "${DEPTH}x" = "x" ]]            && { echo "Need the '--depth' argument!" 1>&2; exit -1; }
-[[ "${LATTICE_CONSTANT}x" = "x" ]] && { echo "Need the '--lattice-constant' argument!" 1>&2; exit -1; }
-[[ "${HOPPING_VALUE}x" = "x" ]]    && { echo "Need the '--hopping-value' argument!" 1>&2; exit -1; }
-[[ "${COMMANDS}x" = "x" ]]         && { echo "Need the '--commands' argument!" 1>&2; exit -1; }
+
 [[ "${TYPE}x" = "x" ]]        && TYPE="cdouble"
 [[ "${SAMPLE_TYPE}x" = "x" ]] && SAMPLE_TYPE="sierpinski:carpet"
 [[ "${SPECTRUM}x" = "x" ]]    && SPECTRUM="Spectrum.${START_WIDTH}.${DEPTH}.dat"
 [[ "${PLASMONS}x" = "x" ]]    && PLASMONS="Plasmons.${START_WIDTH}.${DEPTH}.dat"
-[[ "${IPR_CORR}x" = "x" ]]    && IPR_CORR="IPR.${START_WIDTH}.${DEPTH}.dat"
+[[ "${IPR}x" = "x" ]]         && IPR="IPR.${START_WIDTH}.${DEPTH}.dat"
+[[ "${CORRELATION}x" = "x" ]] && CORRELATION="Correlation.${START_WIDTH}.${DEPTH}.dat"
 [[ "${EPS_BASE}x" = "x" ]]    && EPS_BASE="Epsilon.${START_WIDTH}.${DEPTH}"
 [[ "${HAMILTONIAN}x" = "x" ]] && HAMILTONIAN="Hamiltonian.${START_WIDTH}.${DEPTH}.dat"
 [[ "${COORDINATES}x" = "x" ]] && COORDINATES="Coordinates.${START_WIDTH}.${DEPTH}.dat"
@@ -105,13 +122,18 @@ echo "[***] HOPPING_VALUE    = ${HOPPING_VALUE}" 1>&2
 echo "[***] SAMPLE_TYPE      = ${SAMPLE_TYPE}" 1>&2
 echo "[***] SPECTRUM         = ${SPECTRUM}" 1>&2
 echo "[***] PLASMONS         = ${PLASMONS}" 1>&2
-echo "[***] IPR_CORR         = ${IPR_CORR}" 1>&2
+echo "[***] IPR              = ${IPR}" 1>&2
+echo "[***] CORRELATION      = ${CORRELATION}" 1>&2
 echo "[***] EPS_BASE         = ${EPS_BASE}" 1>&2
 echo "[***] COORDINATES      = ${COORDINATES}" 1>&2
 echo "[***] HAMILTONIAN      = ${HAMILTONIAN}" 1>&2
 echo "[***] ENERGIES         = ${ENERGIES}" 1>&2
 echo "[***] STATES           = ${STATES}" 1>&2
 echo "[***] POTENTIAL        = ${POTENTIAL}" 1>&2
+echo "[***] DIRECTION        = ${DIRECTION}" 1>&2
+echo "[***] Q_MIN            = ${Q_MIN}" 1>&2
+echo "[***] Q_MAX            = ${Q_MAX}" 1>&2
+echo "[***] Q_STEP           = ${Q_STEP}" 1>&2
 echo "[***] COMMANDS         = ${COMMANDS}" 1>&2
 
 
@@ -134,6 +156,10 @@ IFS=',' read -ra COMMANDS_LIST <<< "${COMMANDS}"
 for i in "${COMMANDS_LIST[@]}"; do
     case $i in
         generate)
+            [[ "${LATTICE_CONSTANT}x" = "x" ]] \
+                && { echo "Need the '--lattice-constant' argument!" 1>&2; exit -1; }
+            [[ "${HOPPING_VALUE}x" = "x" ]]    \
+                && { echo "Need the '--hopping-value' argument!" 1>&2; exit -1; }
             generate
         ;;
         convert)
@@ -144,13 +170,33 @@ for i in "${COMMANDS_LIST[@]}"; do
         ;;
         spectrum)
             plasmon_spectrum 1
-            plasmon_spectrum 2
         ;;
         modes)
+            # eigenstate_test 0.463500 512
             plasmon_modes
         ;;
         filter)
             filter_plasmons 1
+        ;;
+        loss)
+            [[ "${DIRECTION}x" = "x" ]]  \
+                && { echo "Need the '--direction' argument!" 1>&2; exit -1; }
+            [[ "${Q_MIN}x" = "x" ]]      \
+                && { echo "Need the '--q-min' argument!" 1>&2; exit -1; }
+            [[ "${Q_MAX}x" = "x" ]]      \
+                && { echo "Need the '--q-max' argument!" 1>&2; exit -1; }
+            [[ "${Q_STEP}x" = "x" ]]     \
+                && { echo "Need the '--q-tep' argument!" 1>&2; exit -1; }
+            loss_spectrum
+        ;;
+        ipr)
+            ipr_all 1 
+        ;;
+        correlation)
+            correlation_all 1 
+        ;;
+        reorder)
+            reorder_all
         ;;
         *)
             echo "Unknown command: $i" 1>&2

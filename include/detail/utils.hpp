@@ -196,9 +196,6 @@ auto allocate_workspace(_Alloc& alloc, std::size_t n)
 
 
 
-
-
-
 template<class _F>
 auto assert_valid(_F const x) noexcept -> void
 {

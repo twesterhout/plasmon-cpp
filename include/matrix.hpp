@@ -147,7 +147,7 @@ public:
 		, _width{ width }
 		// , _ldim{ height }
 		, _ldim{ round_up(height) }
-		, _storage{ height * width }
+		, _storage{ round_up(height) * width }
 	{
 	}
 
@@ -226,7 +226,7 @@ public:
 	constexpr
 	auto data( size_type const i
 	         , size_type const j ) const noexcept -> const_pointer
-	{ return data() + (i + _ldim * j); }
+	{ return data() + (i + ldim() * j); }
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ public:
 	constexpr
 	auto data( size_type const i
 	         , size_type const j ) noexcept -> pointer
-	{ return data() + (i + _ldim * j); }
+	{ return data() + (i + ldim() * j); }
 
 
 	///////////////////////////////////////////////////////////////////////////

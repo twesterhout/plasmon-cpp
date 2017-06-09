@@ -24,16 +24,13 @@ namespace po  = boost::program_options;
 namespace mpi = boost::mpi;
 
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief Real field.
-///////////////////////////////////////////////////////////////////////////////
 using R = double;
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief Complex field.
-///////////////////////////////////////////////////////////////////////////////
+#ifdef ASSUME_REAL
+using C = R;
+#else
 using C = std::complex<R>;
-
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Returns the rank of the admin process.
@@ -126,12 +123,11 @@ auto parse_command_line( int argc, char** argv
 }
 
 
-
-
 auto log_file_name(int const rank, std::string file_name_base)
 {
 	return file_name_base + "." + std::to_string(rank) + ".log";	
 }
+
 
 auto initialize_logging( int const rank
                        , std::string const& file_name_base) -> void
@@ -149,14 +145,14 @@ auto initialize_logging( int const rank
 }
 
 
-template <class _R, class _C, class _F>
+template <class _R, class _C>
 struct IPackage {
 	std::tuple<_R, _R, _R>                frequency_range;
 	std::string                           log_file_name_base;
 	std::string                           eps_file_name_base;
-	tcm::Matrix<_F>                       E;
+	tcm::Matrix<_R>                       E;
 	tcm::Matrix<_C>                       Psi;
-	tcm::Matrix<_C>                       V;
+	tcm::Matrix<std::complex<_R>>         V;
 	std::map<std::string, _R>             constants;
 
 private:
@@ -210,7 +206,7 @@ auto load_matrix(std::string const& file_name) -> tcm::Matrix<_T>
 
 
 
-auto load_ipackage(po::variables_map const& vm) -> IPackage<R, C, R>
+auto load_ipackage(po::variables_map const& vm) -> IPackage<R, C>
 {
 	return { std::make_tuple( vm["in.frequency.start"].as<R>()
 	                        , vm["in.frequency.stop"].as<R>()
@@ -219,7 +215,7 @@ auto load_ipackage(po::variables_map const& vm) -> IPackage<R, C, R>
 	       , vm["out.file.eps"].as<std::string>()
 	       , load_matrix<R>(vm["in.file.energies"].as<std::string>())
 	       , load_matrix<C>(vm["in.file.states"].as<std::string>())
-	       , load_matrix<C>(vm["in.file.potential"].as<std::string>())
+	       , load_matrix<std::complex<R>>(vm["in.file.potential"].as<std::string>())
 		   , tcm::load_constants<R, double, std::map<std::string, R>>(vm)
 		   };
 }
@@ -282,11 +278,11 @@ auto get_job( mpi::communicator const& world
 }
 
 
-template<class _Number, class _F, class _R, class _C, class _Logger>
+template<class _Number, class _R, class _C, class _Logger>
 auto calculate_single( _Number const omega
-                     , tcm::Matrix<_F> const& E
+                     , tcm::Matrix<_R> const& E
 					 , tcm::Matrix<_C> const& Psi
-					 , tcm::Matrix<_C> const& V
+					 , tcm::Matrix<std::complex<_R>> const& V
 					 , std::map<std::string, _R> const& cs
                      , _Logger & lg 
 					 , std::string const& file_name_base ) -> void
@@ -311,8 +307,9 @@ auto calculate_single( _Number const omega
 	LOG(lg, info) << "Diagonalizing dielectric function for omega = "
 	              << omega << "...";
 
-	tcm::Matrix<_C> W{epsilon.height(), 1};
-	tcm::Matrix<_C> Z{epsilon.height(), epsilon.height()};
+	using epsilon_type = typename decltype(epsilon)::value_type;
+	tcm::Matrix<epsilon_type> W{epsilon.height(), 1};
+	tcm::Matrix<epsilon_type> Z{epsilon.height(), epsilon.height()};
 	tcm::lapack::geev(epsilon, W, Z);
 
 	cache("Dielectric function eigenvalues", W, file_name_eigenvalues, lg);
@@ -324,7 +321,7 @@ auto calculate_single( _Number const omega
 
 
 auto run( mpi::communicator & world
-        , IPackage<R, C, R> & input ) -> void
+        , IPackage<R, C> & input ) -> void
 {
 	mpi::broadcast(world, input, admin_rank());
 
@@ -332,8 +329,10 @@ auto run( mpi::communicator & world
 	boost::log::sources::severity_logger<tcm::severity_level> lg;
 
 	auto const homework = get_job<R>(world, input.frequency_range, lg);
+	if (homework.empty()) 
+		return;
 	for(auto const& w : homework) {
-		calculate_single( C{w, input.constants.at("tau")}
+		calculate_single( std::complex<R>{w, input.constants.at("tau")}
 		                , input.E
 						, input.Psi
 						, input.V
@@ -363,7 +362,7 @@ int main(int argc, char** argv)
 	mpi::environment env;
 	mpi::communicator world;
 
-	IPackage<R, C, R> input;
+	IPackage<R, C> input;
 	bool proceed_with_calculation;
 	if (world.rank() == admin_rank()) {
 		proceed_with_calculation = 
