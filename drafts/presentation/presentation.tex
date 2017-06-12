@@ -67,7 +67,7 @@
     \end{definition}
 
     \begin{definition}[Plasma Oscillation]
-        Longitudinal waves of electron charge-density.
+        Longitudinal wave of electron charge-density.
     \end{definition}
 \end{frame}
 
@@ -105,7 +105,7 @@
         \begin{itemize}
         \item \alert{atomic basis $\{|a\rangle\}$}
         \item Hamiltonian of the system is
-            \[ \hat H = -t \,\sum_{\langle a, b \rangle} (\hat c_a^\dagger \hat c_b + \text{h.c.})\;,\]
+            \[ \hat{\mathcal{H}} = -t \,\sum_{\langle a, b \rangle} (\hat c_a^\dagger \hat c_b + \text{h.c.})\;,\]
             $\hat c^\dagger_a$ and $\hat c_a$ are creation and annihilation operators, $t$ is the \alert{hopping} value.
         \item Hopping: 
             \vspace{-0.5cm}
@@ -184,19 +184,25 @@
 \subsection{Experiments}
 
 \begin{frame}{Electron Energy Loss Spectroscopy (EELS)}
-    \begin{itemize}
-    \item<2-> Shoot electrons on the sample.
+    \begin{columns}[T]
+    \column[t]{0.6\textwidth}
         \begin{itemize}
-        \item<4-> Electron beam with a well-defined wavevector $\mathbf{k}$.
-        \item<5-> Inelastic scattering results in \alert{energy loss $E = \hbar\omega$} and \alert{momentum transfer $\hbar\mathbf{q}$}.
+        \item Shoot electrons on the sample.
+            \begin{itemize}
+            \item Electron beam with a well-defined four-momentum $p^{\mu}$.
+            \item Inelastic scattering results in \alert{energy loss $E = \hbar\omega$} and \alert{momentum transfer $\hbar\mathbf{q}$}.
+            \end{itemize}
+        \item Look at (usually) transmitted electrons.
+            \[ \overbrace{\frac{\text{d}^2\sigma}{\text{d}\Omega\text{d}E}} ^{\mathclap{\text{\parbox[c]{3cm}{\normalsize double-differential \\ cross section}}}} \propto\; 
+               \underbrace{-\operatorname{Im}\! \left[\frac{1}{\langle\mathbf{q}| \hat\varepsilon(\omega) |\mathbf{q}\rangle}\right]} _\text{\normalsize \alert{loss function}} \;.
+            \] %
         \end{itemize}
-    \item<3-> Look at (usually) transmitted electrons.
-        \uncover<6->{
-        \[ \hspace{-2.5cm} \overbrace{\frac{\text{d}^2\sigma}{\text{d}\Omega\text{d}E}} ^\text{\normalsize double-differential cross section} \hspace{-2.0cm}\propto\; 
-           \underbrace{-\operatorname{Im}\! \left[\frac{1}{\langle\mathbf{q}| \hat\varepsilon(\omega) |\mathbf{q}\rangle}\right]} _\text{\normalsize \alert{loss function}} \;.
-        \] %
-        }
-    \end{itemize}
+    \column[t]{0.4\textwidth}
+        \vspace{-0.3cm}
+        \begin{figure}
+        \includegraphics[height=6.5cm]{EELS-crop.pdf}
+        \end{figure}
+    \end{columns}
 \end{frame}
 
 \subsection{Calculations}
