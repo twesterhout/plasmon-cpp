@@ -3,7 +3,7 @@
 \usepackage[margin=2cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{textcomp}
+% \usepackage{textcomp}
 
 \usepackage[font={small,it}]{caption}
 
@@ -16,7 +16,7 @@
 \usepackage{color}
 \usepackage{verbatim}
 \usepackage[inline]{enumitem}
-
+\usepackage{listings}
 \usepackage{wrapfig}
 
 \usepackage{tikz}
@@ -25,11 +25,44 @@
 \usepackage{hyperref}
 \bibliographystyle{apalike}
 
-% \title{}
-% \date{}
-% \author{}
+
+\usepackage{kpfonts}
 
 \begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+   
+        {\ttfamily\LARGE Plasmons in Fractals\par}
+        
+        \vspace{1.0cm}
+        
+        {\ttfamily\large\textbf{Tom Westerhout} \par}
+        
+        \vspace{0.5cm}
+
+        {\ttfamily\textit{Supervisors}: Shengjun Yuan \& Edo van Veen}
+        
+        \vfill
+        
+        \vspace{0.8cm}
+        
+        \hbox{\hspace{5.6cm}\includegraphics{ru_e_a4_zwart_2014.eps}}
+        
+        {\ttfamily Theory of Condensed Matter \par}
+        {\ttfamily 15 August 2017}
+        
+    \end{center}
+\end{titlepage}
+
+\begin{center}
+    \input{Picture-Eigenstate-0.176000}
+\end{center}
+
+\tableofcontents
+
+\newpage
 
 \section{Introduction}
     \textbf{YET TO BE WRITTEN}
@@ -472,6 +505,37 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
 \newpage
 \section{Conclusion}
     \textbf{YET TO BE WRITTEN}
+
+
+\newpage
+\appendix
+
+\section{Code}
+
+    As of now, there are \textit{no} open source projects that allow to perform $\mathbf{r}$--space calculations of plasmonic properties in the tight--binding approximation. We started a new project \cite{plasmon-cpp} to fill this gap. It uses \texttt{C++} as its primary language.
+
+\begin{lstlisting}[mathescape]
+    plasmon-cpp/
+        bin/
+            generate_system.py           $\Rightarrow$ hamiltonian generation script
+            functions.sh                 $\Rightarrow$ data analysis utilities
+        include/
+            blas.hpp                     $\Rightarrow$ BLAS wrappers
+            lapack.hpp                   $\Rightarrow$ LAPACK wrappers
+            constants.hpp                $\Rightarrow$ physical constants
+            dielectric_function_v2.hpp   $\Rightarrow$ calculation of $\hat\varepsilon$
+        src/
+            convert.cpp                  $\Rightarrow$ text $\leftrightarrow$ binary conversions
+            hello.cpp                    $\Rightarrow$ calculation of $\hat\varepsilon(\omega)$
+            potential.cpp                $\Rightarrow$ generation of $\hat V_\text{Coulomb}$
+            solve_system.cpp             $\Rightarrow$ hamiltonian solver
+\end{lstlisting}
+
+    The project consists of three levels. The lowest layer provides wrappers around some of \texttt{BLAS} (\texttt{B}asic \texttt{L}inear \texttt{A}lgebra \texttt{S}ubprograms) and \texttt{LAPACK} (\texttt{L}inear \texttt{A}lgebra \texttt{Pack}age) routines. Currently only two realisations are supported: \texttt{ATLAS} \cite{atlas_siam} and \texttt{MKL} \cite{intel-mkl}. We plan to add support for GPU Computations later. The second layer implements eq. \eqref{eq:appl:result_w} using \texttt{MPI} (\texttt{M}essage \texttt{P}assing \texttt{I}nterface) to distribute the tasks between multiple nodes. The third layer consists of \texttt{Bash} scripts to allow for easy composition of tools and data analysis.
+
+    Refer to the project page for further details.
+ 
+
 
 \newpage
 \bibliography{bibliography}
