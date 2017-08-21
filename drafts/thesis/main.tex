@@ -7,6 +7,7 @@
 
 \usepackage[font={small,it}]{caption}
 
+\usepackage{color}
 \usepackage{graphicx}
 \usepackage{epstopdf}
 \usepackage{amsmath}
@@ -18,7 +19,7 @@
 \usepackage[inline]{enumitem}
 \usepackage{listings}
 \usepackage{wrapfig}
-
+\usepackage{makeidx}
 \usepackage{tikz}
 
 \usepackage{cite}
@@ -28,15 +29,25 @@
 
 \usepackage{kpfonts}
 
+
+\hypersetup{%
+    colorlinks,
+    citecolor=black!90!blue!40,
+    linkcolor=black!50!blue!90,
+    urlcolor=black!50!blue!90
+}
+
+\makeindex
+
 \begin{document}
 
 \begin{titlepage}
     \begin{center}
-        \vspace*{1cm}
+        \vspace*{3cm}
    
         {\ttfamily\LARGE Plasmons in Fractals\par}
         
-        \vspace{1.0cm}
+        \vspace{1.5cm}
         
         {\ttfamily\large\textbf{Tom Westerhout} \par}
         
@@ -46,12 +57,13 @@
         
         \vfill
         
-        \vspace{0.8cm}
         
         \hbox{\hspace{5.6cm}\includegraphics{ru_e_a4_zwart_2014.eps}}
         
         {\ttfamily Theory of Condensed Matter \par}
         {\ttfamily 15 August 2017}
+
+        \vspace{2cm}
         
     \end{center}
 \end{titlepage}
@@ -65,7 +77,14 @@
 \newpage
 
 \section{Introduction}
-    \textbf{YET TO BE WRITTEN}
+    ``Artificial graphene'' \index{Artificial graphene}, a system of of quantum dots \index{Quantum dot} arranged in a honeycomb lattice \index{Lattice!Honeycomb}, first achieved in \cite{engineering2009}, attracted a lot of attention lately. Different experimental techniques \cite{artificial2013} allow for creation of arbitrary non-periodic 2D lattices \index{Lattice} with up to tens of millions of sites \index{Site}. This presents an opportunity to study systems and regimes not naturally present in nature.
+    
+    2D Fractal structures \index{Fractal} are perfect examples of such systems. Some simple fractals with finite ramifications \index{Ramification!Finite} have been solved analytically, i.e. their eigenstates have been obtained in the form of analytical expressions \cite{kadanoff1983}. For others, like Sierpinski Carpet \index{Sierpinski Carpet}, no progress has been made. The latter systems are better tackled numerically. Hausdorff dimension \index{Hausdorff dimension} of Sierpinski Carpet has been calculated both analytically \cite{mcmullen1984hausdorff} and numerically \cite{transport2016}, transport \cite{transport2016} and optical \cite{optics2017} properties are known too. Plasmonic \index{Plasmon} properties haven't been investigated yet, though. And this is the topic of this thesis.
+
+    Surface plasmons \index{Plasmon!Surface} have found applications in surface-enhanced spectroscopies (\cite{raman2005}, \cite{second-harmonic1994}),  biological and chemical sensing (\cite{towards2005}), lithographic fabrication (\cite{nanolithography2004}), and, of course, photonics (\cite{brongersma2007surface}).
+
+    Here we present a numerical method for calculation of plasmonic properties of systems with no translational invariance. The method involves only real space calculations and is thus applicable to arbitrary geometries. We start by giving a theoretical derivation of the method. A translation to the language of finite matrices is then made to allow numerical calculations. The implementation is first tested on graphene nanotriagles, a system for which plasmon spectrum has already been calculated in \cite{plasmonic2015}. We find that our results correspond to the previously known. We then move on to apply the method to a third iteration Sierpinski Carpet. 
+
 
 \newpage
 \section{Theory of Linear Response in a Nutshell} \label{sec:linear_response}
@@ -354,7 +373,7 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \end{wrapfigure}
     We start with a toy system --- a small graphene nanotriangle. Picture \ref{fig:coordinates-ZigZag-40} shows the system. It's a flake of $1761$ atomic sites with hexagonal lattice type and graphene lattice constant $a \approx 0.246$ nm. Although the system is about twice as small in width as the triangles discussed in \cite{plasmonic2015}, it is big enough for testing purposes. Our implementation of eq. \eqref{eq:appl:result_w} differs significantly from the one used in \cite{plasmonic2015}. It is thus interesting to check whether both implementations produce the same physical results.
 
-    \texttt{TIPSI} \texttt{Fortran}--\texttt{Python} package \cite{tipsi} suits the task of constructing a tight-binding Hamiltonian rather well. The \href{https://github.com/twesterhout/plasmon-cpp/blob/master/bin/generate\_system.py}{\texttt{bin/generate\_system.py}} script illustrates how it is done. Graphene lattice constant of $0.246$ nm and the nearest-neighbour hopping value of $2.8$ eV are used.
+    \texttt{TIPSI} \texttt{Fortran}--\texttt{Python} package \cite{tipsi} suits the task of constructing a tight-binding Hamiltonian rather well. The \hyperref[code]{\texttt{bin/generate\_system.py}} script illustrates how it is done. Graphene lattice constant of $0.246$ nm and the nearest-neighbour hopping value of $2.8$ eV are used.
 
     \begin{figure}[h]
     \vspace{-0.3cm}
@@ -373,9 +392,9 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \end{minipage}
     \end{figure}
 
-    We then carry out the diagonalisation of the Hamiltonian using the \href{https://github.com/twesterhout/plasmon-cpp/blob/master/src/solve\_system.cpp}{\texttt{solve\_system}} utility program. Internally a multi-threaded implementation of \texttt{LAPACK} is used which is provided by the \texttt{Intel MKL} \cite{intel-mkl} library.
+    We then carry out the diagonalisation of the Hamiltonian using the \hyperref[code]{\texttt{solve\_system}} utility program. Internally a multi-threaded implementation of \texttt{LAPACK} is used which is provided by the \texttt{Intel MKL} \cite{intel-mkl} library.
     
-    Next, we use the \href{https://github.com/twesterhout/plasmon-cpp/blob/master/src/hello.cpp}{\texttt{dielectric}} utility to calculate the dielectric function $\hat\varepsilon(\omega)$ for frequencies corresponding to $\hbar\omega \in [0.1,0.8]$ eV. Energy range matches the one used in \cite{plasmonic2015} to allow for comparison of the resulting loss spectra. For the very same reason we also use the same values for the thermodynamic variables: chemical potential $\mu = 0.4$ eV, temperature $T = 300$ K, and ``inverse relaxation time'' $\eta = 6$ meV$\!/\hbar$. Having almost $300$ of $1761\times1761$ matrices is not really representative so we turn to the $\mathbf{r}$--approach to obtain some visualisable results. The loss spectrum, i.e. the \ $-\operatorname{Im}[\hat\varepsilon^{-1}_{n_{\{1, 2\}}(\omega)}(\omega)]$ vs. $\omega$ plot is shown on fig. \ref{fig:spectrum-ZigZag-40}. Solid lines show the ``first maximum'' while dashed lines --- the second. They coincide almost everywhere which is in correspondence with results in \cite{plasmonic2015}. The approximately the same ``frequency'' of the peaks is also reassuring. The first two (due to degeneracy) plasmon eigenmodes even appear at close frequencies: $0.285$ eV (our system) and $0.275$ eV (\!\!\cite{plasmonic2015}); which is amazing taking into account the fact that systems significantly differ in size.
+    Next, we use the \hyperref[code]{\texttt{dielectric}} utility to calculate the dielectric function $\hat\varepsilon(\omega)$ for frequencies corresponding to $\hbar\omega \in [0.1,0.8]$ eV. Energy range matches the one used in \cite{plasmonic2015} to allow for comparison of the resulting loss spectra. For the very same reason we also use the same values for the thermodynamic variables: chemical potential $\mu = 0.4$ eV, temperature $T = 300$ K, and ``inverse relaxation time'' $\eta = 6$ meV$\!/\hbar$. Having almost $300$ of $1761\times1761$ matrices is not really representative so we turn to the $\mathbf{r}$--approach to obtain some visualisable results. The loss spectrum, i.e. the \ $-\operatorname{Im}[\hat\varepsilon^{-1}_{n_{\{1, 2\}}(\omega)}(\omega)]$ vs. $\omega$ plot is shown on fig. \ref{fig:spectrum-ZigZag-40}. Solid lines show the ``first maximum'' while dashed lines --- the second. They coincide almost everywhere which is in correspondence with results in \cite{plasmonic2015}. The approximately the same ``frequency'' of the peaks is also reassuring. The first two (due to degeneracy) plasmon eigenmodes even appear at close frequencies: $0.285$ eV (our system) and $0.275$ eV (\!\!\cite{plasmonic2015}); which is amazing taking into account the fact that systems significantly differ in size.
 
     \begin{figure}[h] 
     \center
@@ -503,14 +522,17 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
     \end{figure}
 
 \newpage
-\section{Conclusion}
-    \textbf{YET TO BE WRITTEN}
+\section{Conclusion \& Outline}
+    
+    We've presented a new approach to calculating plasmonic properties of small systems. We've shown that it works. Although quite costly, with modern hardware this approach allows us to calculate the dielectric function of an arbitrary non-periodic lattice. We've also shown some first results obtained with this method, namely the fact that there are some well-defined plasmons in Sierpinski carpets. With current experimental techniques, these results can be proved experimentally.
 
+    In the meantime, we hope to apply the method to other geometries. With the current implementation the maximum size of the system lies under a dozen thousands of sites. Modern GPUs have become extremely good (even better than CPUs) at matrix computations. There is thus a possibility of changing the underlying implementation of the method to make use of GPUs too in the hopes of speeding up the computations and allowing us to explore bigger systems.
 
 \newpage
 \appendix
 
 \section{Code}
+\label{code}
 
     As of now, there are \textit{no} open source projects that allow to perform $\mathbf{r}$--space calculations of plasmonic properties in the tight--binding approximation. We started a new project \cite{plasmon-cpp} to fill this gap. It uses \texttt{C++} as its primary language.
 
@@ -539,4 +561,8 @@ Eq. \eqref{eq:qm:result_w} was written in Gauss system. For the calculations it 
 
 \newpage
 \bibliography{bibliography}
+
+% \newpage
+% \printindex
+
 \end{document}
