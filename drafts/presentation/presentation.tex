@@ -42,8 +42,7 @@
 \author{Tom Westerhout \\ 
         \emph{Supervisors:} Shengjun Yuan \& Edo van Veen \\
         TCM}
-\titlegraphic{\vspace{-2.0cm}\begin{center}\input{Eigenstates-Intro}\end{center}}
-\date{}
+\date[BZ 2017]{Bachelor Zomersymposium, 2017}
 
 \begin{document}
 
@@ -53,8 +52,6 @@
 
 \section{Introduction}
 
-\subsection{Plasmons}
-
 \begin{frame}{Stained Glass}
     \begin{figure}
     \includegraphics[width=8cm]{stained-glass-bird}
@@ -63,15 +60,25 @@
 
 \begin{frame}{Plasmons}
     \begin{definition}[Plasmon]
-        Quantum of plasma oscillation (\emph{think quasiparticle}).
+        Quanta of plasma oscillation (\emph{think quasiparticle}).
     \end{definition}
 
     \begin{definition}[Plasma Oscillation]
-        Longitudinal wave of electron charge-density.
+        Longitudinal waves of electron charge-density.
     \end{definition}
 \end{frame}
 
-\subsection{Fractals}
+\begin{frame}{Simple example}
+    \begin{itemize}
+    \item<1-> Free electron gas with positively charged atom cores in the background.
+    \item<1-> Oscillating electric field $\mathbf{E}(t) = \mathbf{E_0}\exp(-i\omega t)$.
+    \item<2-> Equation of motion: \[ \mathbf{\ddot{x}} + \gamma\mathbf{\dot{x}} = -\frac{e}{m}\mathbf{E}(t)\; .\]
+    \item<3-> Displaced electrons generate a polarization $\mathbf{P} = -Ne\mathbf{x}$ \\ ($N$ is the electron density).
+    \item<4-> From $\epsilon_0\mathbf{E} + \mathbf{P} = \epsilon_0\varepsilon(\omega)\mathbf{E}$ \ we get $\varepsilon(\omega)$.
+    \item<4-> In high frequency limit $\varepsilon(\omega) \approx 1 - \frac{\omega_p^2}{\omega^2}$, \\ $\omega_p$ --- \alert{plasma frequency}.
+    \item<5-> If $\omega = \omega_p$, we get longitudinal oscillation of electron-charge density.
+    \end{itemize}
+\end{frame}
 
 \begin{frame}{Fractals}
     \begin{itemize}
@@ -97,46 +104,12 @@
     \end{itemize}
 \end{frame}
 
-\subsection{Physical Description}
-
-\begin{frame}{Tight Binding}
-    \begin{columns}[T]
-    \column[t]{0.6\textwidth}
-        \begin{itemize}
-        \item \alert{atomic basis $\{|a\rangle\}$}
-        \item Hamiltonian of the system is
-            \[ \hat{\mathcal{H}} = -t \,\sum_{\langle a, b \rangle} (\hat c_a^\dagger \hat c_b + \text{h.c.})\;,\]
-            $\hat c^\dagger_a$ and $\hat c_a$ are creation and annihilation operators, $t$ is the \alert{hopping} value.
-        \item Hopping: 
-            \vspace{-0.5cm}
-            \[ \underbrace{\hat{c}_a^\dagger \underbrace{\hat c_b |\psi \rangle}_{\mathclap{\text{``take'' from $b$}}}}_{\mathclap{\text{``move'' to $a$}}} \]
-        \end{itemize}
-
-    \column[t]{0.4\textwidth}
-        \begin{figure}
-        \includegraphics[width=\textwidth]{{nearest_neighbours}.pdf}
-        \end{figure}
-    \end{columns}
-\end{frame}
-
-\begin{frame}{System}
-    \begin{itemize}
-    \item Electron system is described (in one-particle approximation) by
-        \begin{itemize}
-        \item \alert{eigenenergies $\{E_i\}$} and
-        \item \alert{eigenstates $\{|i\rangle\}$}.
-        \end{itemize}
-    \item Grand-canonical ensemble, i.e. \alert{temperature} $T$ and \alert{chemical potential} $\mu$ are fixed.
-    \item Occupational numbers are given by the \alert{Fermi-Dirac distribution}.
-    \end{itemize}
-\end{frame}
-
 \begin{frame}{Problem}
     \begin{itemize}
-    \item All plasmonic properties are obtained from the \alert{dielectric function} $\hat\varepsilon$. \\
-        $\implies$ Goal: \alert{calculate $\hat\varepsilon$}.
-    \item There exist good methods for calculation of the dielectric function in \alert{momentum space}, i.e. they rely on translational symmetry of the system.
-    \item But in fractals, there is \alert{no translational symmetry}!
+    \item Plasmonic properties are obtained from $\varepsilon$ \\
+        $\implies$ \alert{Goal}: calculate $\varepsilon$.
+    \item There exist good methods to calculate the dielectric function in \alert{momentum space}, i.e. rely on translational symmetry.
+    \item In fractals, there is \alert{no translational symmetry}!
     \item Calculations have to be done in \alert{real space}. \\
         $\implies$ \alert{New method}.
     \end{itemize}
@@ -144,19 +117,62 @@
 
 \section{Method}
 
-\subsection{Theory}
+\subsection{RPA}
 
-\begin{frame}{Dielectric Function in Real Space}
+\begin{frame}{System}
+    \begin{itemize}
+    \item<1-> Electron system is described (in a one-particle approximation) by
+        \begin{itemize}
+        \item \alert{eigenenergies $\{E_i\}$} and
+        \item \alert{eigenstates $\{|i\rangle\}$}.
+        \end{itemize}
+    \item<2-> Grand-canonical ensemble, i.e. \alert{temperature} $T$ and \alert{chemical potential} $\mu$ are fixed.
+    \item<3-> Occupational numbers are given by the \alert{Fermi-Dirac distribution}
+        \[ n_i = \frac{1}{\exp\!\left(\frac{E_i - \mu}{k_\text{B}\!T}\right) + 1} \;.\]
+    \item<4-> Introduce a one-particle density matrix
+        \[ \hat\rho_0 = \sum_i n_i\, |i\rangle\!\langle i| \;.\]
+    \end{itemize}
+\end{frame}
 
-    Within the Random Phase Approximation (RPA) we obtain:
+\begin{frame}{Random Phase Approximation}
+    \begin{itemize}
+    \item<1-> Perturbation of the form
+        \[ \alert{\hat V e^{-i(\omega + i\eta)t}}\,,\text{ with }\eta \to +0\,. \]
+        \small{($\hat V$ is diagonal in $\mathbf{r}$-basis, i.e. $\langle\mathbf{r}|\hat V|\mathbf{r'}\rangle = V(\mathbf{r})\delta^3(\mathbf{r} - \mathbf{r'})$)}
+    \item<2-> Results in an induced charge density variation $\delta\hat N(t)$
+    \item<3-> \alert{Self-consistency equation}
+        \[ \langle \mathbf{r} | \hat V_\text{tot}(t) | \mathbf{r} \rangle
+            = \langle \mathbf{r} | \hat V_\text{ext}(t) | \mathbf{r} \rangle + \int\!\! \text{d}^3 r' \; \langle \mathbf{r} | \hat V_\text{Coulomb} | \mathbf{r'} \rangle \langle \mathbf{r'} | \delta\hat N(t) | \mathbf{r'} \rangle \;. \]
+    \end{itemize}
+\end{frame}
 
-    \[ \langle \mathbf{r} | \hat V_\text{ext}(\omega) | \mathbf{r} \rangle = \int\!\! \text{d}^3 r' \; \langle \mathbf{r} | \hat \varepsilon(\omega) | \mathbf{r'} \rangle \langle \mathbf{r'} | \hat V | \mathbf{r'} \rangle \; , \text{ where} 
+\begin{frame}
+    \dots a good excercise in calculus and Fourier analysis \dots
+    \[ \implies \langle \mathbf{r} | \hat V_\text{ext}(\omega) | \mathbf{r} \rangle = \int\!\! \text{d}^3 r' \; \langle \mathbf{r} | \hat \varepsilon(\omega) | \mathbf{r'} \rangle \langle \mathbf{r'} | \hat V | \mathbf{r'} \rangle \; , \text{ where} 
     \]
+    \vspace{-1.0cm}
     \begin{multline*}
+        \begin{aligned}
         \langle \mathbf{r} | \hat \varepsilon(\omega) | \mathbf{r'} \rangle 
-            = \langle \mathbf{r} | \mathbf{r'} \rangle - \lim_{\eta \to 0+} \sum_{i,\,j} \frac{n_i - n_j}{E_i \!-\! E_j - \hbar(\omega \!+\! i\eta)} \int\!\! \text{d}^3 r'' \frac{e^2}{\| \mathbf{r} - \mathbf{r''} \|} \\
-        \times \langle j |\mathbf{r''}\rangle \langle\mathbf{r''} | i \rangle \langle i | \mathbf{r'}\rangle \langle \mathbf{r'} | j \rangle \;.
+            &= \lim_{\eta \to 0+} \langle \mathbf{r} | \hat\varepsilon(\omega + i\eta) | \mathbf{r'} \rangle = \lim_{\eta \to 0+} \int\limits_{0}^{\infty} \!\! \text{d}\tau \; e^{i (\omega +i\eta) \tau}\,\langle \mathbf{r} | \hat\varepsilon(\tau) | \mathbf{r'} \rangle \\
+            &= \langle \mathbf{r} | \mathbf{r'} \rangle - \lim_{\eta \to 0+} \sum_{i,\,j} \frac{n_i - n_j}{E_i \!-\! E_j - \hbar(\omega \!+\! i\eta)} \int\!\! \text{d}^3 r'' \frac{e^2}{\| \mathbf{r} - \mathbf{r''} \|}
+        \end{aligned} \\
+        \times \langle j |\mathbf{r''}\rangle \langle\mathbf{r''} | i \rangle \langle i | \mathbf{r'}\rangle \langle \mathbf{r'} | j \rangle
     \end{multline*}
+\end{frame}
+
+\begin{frame}{Tight Binding}
+    \begin{itemize}
+    \item<1-> Electrons are ``tightly bound'' to atoms \\
+        $\implies$ \alert{atomic basis $\{|a\rangle\}$}
+        \begin{itemize}
+        \item $\langle a|b \rangle = \delta_{a,b}$ \hspace{0.5cm} and \hspace{0.5cm} $\sum_a |a\rangle \langle a | = \hat{\mathds{1}}$,
+        \item $\langle \mathbf{r} | a \rangle \approx 1$.
+        \end{itemize}
+    \item<2-> Example Hamiltonian of the system is
+        \[ \hat H = -t \,\sum_{\langle a, b \rangle} (\hat c_a^\dagger \hat c_b + \text{h.c.})\;,\]
+        $\hat c^\dagger_a$ and $\hat c_a$ are creation and annihilation operators, $t$ is the \alert{hopping value}.
+    \end{itemize}
 \end{frame}
 
 \subsection{Implementation}
@@ -170,12 +186,12 @@
     \end{itemize}
 \end{frame}
 
-
-\begin{frame}{Code}
+\begin{frame}{Parallelisation}
     \begin{itemize}
-    \item Written \texttt{C++} package to calculate $\hat\varepsilon$ for a \alert{general} system described by TB.
-    \item \alert{$\approx 8.5$ thousands} lines of code (\emph{excluding} data analysis scripts).
-    \item $\approx 400000$ computational hours spent, that is \\ \alert{$\approx 45$ years of calculations}.
+    \item Use different cluster nodes (\emph{think small supercomputers}) to calculate $\hat\varepsilon$ for different frequencies \\
+        $\implies$ \texttt{MPI}, \texttt{Boost}
+    \item Use different threads to speed up matrix operations \\
+        $\implies$ \texttt{Intel MKL}, \texttt{OpenMP}
     \end{itemize}
 \end{frame}
 
@@ -184,25 +200,19 @@
 \subsection{Experiments}
 
 \begin{frame}{Electron Energy Loss Spectroscopy (EELS)}
-    \begin{columns}[T]
-    \column[t]{0.6\textwidth}
+    \begin{itemize}
+    \item<1-> Shoot electrons on the sample.
         \begin{itemize}
-        \item Shoot electrons on the sample.
-            \begin{itemize}
-            \item Electron beam with a well-defined four-momentum $p^{\mu}$.
-            \item Inelastic scattering results in \alert{energy loss $E = \hbar\omega$} and \alert{momentum transfer $\hbar\mathbf{q}$}.
-            \end{itemize}
-        \item Look at (usually) transmitted electrons.
-            \[ \overbrace{\frac{\text{d}^2\sigma}{\text{d}\Omega\text{d}E}} ^{\mathclap{\text{\parbox[c]{3cm}{\normalsize double-differential \\ cross section}}}} \propto\; 
-               \underbrace{-\operatorname{Im}\! \left[\frac{1}{\langle\mathbf{q}| \hat\varepsilon(\omega) |\mathbf{q}\rangle}\right]} _\text{\normalsize \alert{loss function}} \;.
-            \] %
+        \item<3-> Electron beam with a well-defined wavevector $\mathbf{k}$.
+        \item<4-> Inelastic scattering results in \alert{energy loss $E = \hbar\omega$} and \alert{momentum transfer $\hbar\mathbf{q}$}.
         \end{itemize}
-    \column[t]{0.4\textwidth}
-        \vspace{-0.3cm}
-        \begin{figure}
-        \includegraphics[height=6.5cm]{EELS-crop.pdf}
-        \end{figure}
-    \end{columns}
+    \item<2-> Look at (usually) transmitted electrons.
+        \uncover<5->{
+        \[ \hspace{-2.5cm} \overbrace{\frac{\text{d}^2\sigma}{\text{d}\Omega\text{d}E}} ^\text{\normalsize double-differential cross section} \hspace{-2.0cm}\propto\; 
+           \underbrace{-\operatorname{Im}\! \left[\frac{1}{\langle\mathbf{q}| \hat\varepsilon(\omega) |\mathbf{q}\rangle}\right]} _\text{\normalsize \alert{loss function}} \;.
+        \] %
+        }
+    \end{itemize}
 \end{frame}
 
 \subsection{Calculations}
@@ -228,21 +238,13 @@
 
 
 
-\section{Summary}
+\section*{Summary}
 
 \begin{frame}{Summary}
   \begin{itemize}
   \item \Large{It \emph{is} possible to do calculations of $\hat\varepsilon$ in real space.}
-  \item \Large{There \emph{are} well defined plasmons in Sierpinski carpets, which is \emph{unexpected} for a system without translational invariance.}
-  \item \Large{The created package can be \emph{reused} to study plasmonic properties of other systems.}
+  \item \Large{There \emph{are} well defined plasmons in Sierpinski carpets.}
   \end{itemize}
-\end{frame}
-
-\begin{frame}{Outlook}
-    \begin{itemize}
-    \item \Large{Publish the results, i.e. write a paper.}
-    \item \Large{Look at \emph{other} systems with no translational symmetry.}
-    \end{itemize}
 \end{frame}
 
 \begin{frame}{}
@@ -258,32 +260,9 @@
 
 % All of the following is optional and typically not needed. 
 \appendix
+\section<presentation>*{\appendixname}
+\subsection<presentation>*{For Further Reading}
 
-\section{For Extra Information}
-
-\begin{frame}{Simple example of plasma oscillation}
-    \begin{itemize}
-    \item Free electron gas with positively charged atom cores in the background.
-    \item Oscillating electric field $\mathbf{E}(t) = \mathbf{E_0}\exp(-i\omega t)$.
-    \item Equation of motion: \[ \mathbf{\ddot{x}} + \gamma\mathbf{\dot{x}} = -\frac{e}{m}\mathbf{E}(t)\; .\]
-    \item Displaced electrons generate a polarization $\mathbf{P} = -Ne\mathbf{x}$ \\ ($N$ is the electron density).
-    \item From $\epsilon_0\mathbf{E} + \mathbf{P} = \epsilon_0\varepsilon(\omega)\mathbf{E}$ \ we get $\varepsilon(\omega)$.
-    \item In high frequency limit $\varepsilon(\omega) \approx 1 - \frac{\omega_p^2}{\omega^2}$, \\ $\omega_p$ --- \alert{plasma frequency}.
-    \item If $\omega = \omega_p$, we get longitudinal oscillation of electron-charge density.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Random Phase Approximation}
-    \begin{itemize}
-    \item Perturbation of the form
-        \[ \alert{\hat V e^{-i(\omega + i\eta)t}}\,,\text{ with }\eta \to +0\,. \]
-        \small{($\hat V$ is diagonal in $\mathbf{r}$-basis, i.e. $\langle\mathbf{r}|\hat V|\mathbf{r'}\rangle = V(\mathbf{r})\delta^3(\mathbf{r} - \mathbf{r'})$)}
-    \item Results in an induced charge density variation $\delta\hat N(t)$
-    \item \alert{Self-consistency equation}
-        \[ \langle \mathbf{r} | \hat V_\text{tot}(t) | \mathbf{r} \rangle
-            = \langle \mathbf{r} | \hat V_\text{ext}(t) | \mathbf{r} \rangle + \int\!\! \text{d}^3 r' \; \langle \mathbf{r} | \hat V_\text{Coulomb} | \mathbf{r'} \rangle \langle \mathbf{r'} | \delta\hat N(t) | \mathbf{r'} \rangle \;. \]
-    \end{itemize}
-\end{frame}
 
 \end{document}
 
