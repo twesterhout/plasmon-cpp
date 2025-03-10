@@ -1,17 +1,13 @@
-This repository contains the code for my Bachelor thesis. There is some (incomplete) documentation of C++ code in the `docs` directory and `README.pdf` contains some explanation of the underlying physical theory. 
+This repository contains the code for the paper:
 
-The following list contains some questions I could find no answer to yet. I'd really appreciate it if you could have a look at them and maybe help me out.
+<div align="center">
+<h3>
+“Plasmon confinement in fractal quantum systems”
+</h3>
+<p>by Tom Westerhout (@twesterhout), Edo van Veen, Mikhail I. Katsnelson, and Shengjun Yuan</p>
 
-Questions
----------
+[![arxiv](https://img.shields.io/badge/1801.06439-arxiv?style=flat-square&logo=arxiv&logoColor=white&label=arXiv&labelColor=888888&color=blue)](https://arxiv.org/abs/1801.06439)
+[![published](https://img.shields.io/badge/10.1103%2FPhysRevB.97.205434-published?style=flat-square&logo=doi&logoColor=white&labelColor=888888&color=blue)](https://doi.org/10.1103/PhysRevB.97.205434)
+</div>
 
-1) In RPA, we use perturbation potential of the form `V*exp(-i * omega * t + eta * t)`. Why is `V` taken to be diagonal in position representation? This assumtion seems logical for some cases. Consider, for example, constant external electric field E. Then `V(r) = -q * E . r`, which is, by definition, diagonal. The same holds for applied magnetic field `B(r)`. But does this hold in general?
-
-__Answer__: I spoke to Mikhail Katsnelson today, he confirmed that `V` is usually diagonal.
-
-2) Have a look at the derivation in footnote 3. What is the Fourier transform of it? Factor exp(eta * t) results in divergencies in Fourier integral... Or is there a mistake in my calculations? Maple, for example is able to calculate the transform of `exp(-i * omega * t) * (1 + eta * t)`. Here, I used the Taylor expansion of `exp`. The result is `2 * Pi * (I * eta * Dirac(1, omega) + Dirac(omega))`. This is a really nice, because then we can neglect the first delta function under the assumption that `eta` is small. Unfortunately, I failed to derive this expression myself and I don't really trust my knowledge of Maple in this case.
-
-__Answer__: There is a rather nice description of this concept in "Causality and Dispertion Relations" book by H.M. Nussenzveig. The method's description should now be correct -- see updated PDF.
-
-3) We do all the calculations in the _atomic basis_, i.e. a basis spanned by local site wave functions.I wonder, is this basis actually complete? What would be a good explanation for it? Is this because we use tight-binding approximation? In the sense that electrons are "tight" to atoms and thus local site functions + linear combinations thereof give us all possible states?
-__Answer__: Yes.
+> **Note:** The code was written as part of my Bachelor thesis. There is some (incomplete) documentation of C++ code in the `docs` directory and `README.pdf` contains some explanation of the underlying physical theory.
